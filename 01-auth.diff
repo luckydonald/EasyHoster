@@ -27,24 +27,24 @@ index 4d4d4d4..d7d4d4d 100644
  BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
  app = FastAPI()
-+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-+
-+# JWT settings
-+@AuthJWT.load_config
-+def get_config():
-+    return JWTSettings()
-+
-+class JWTSettings(BaseModel):
-+    authjwt_secret_key: str = "your-secret-key"
-+
-+class User(BaseModel):
-+    username: str
-+    hashed_password: str
-+
-+# In-memory storage for users (could be replaced with a database)
-+users = {
-+    "admin": User(username="admin", hashed_password=pwd_context.hash("admin_password"))
-+}
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+# JWT settings
+@AuthJWT.load_config
+def get_config():
+    return JWTSettings()
+
+class JWTSettings(BaseModel):
+    authjwt_secret_key: str = "your-secret-key"
+
+class User(BaseModel):
+    username: str
+    hashed_password: str
+
+# In-memory storage for users (could be replaced with a database)
+users = {
+    "admin": User(username="admin", hashed_password=pwd_context.hash("admin_password"))
+}
 
  # CORS configuration
  app.add_middleware(
@@ -101,4 +101,3 @@ index 4d4d4d4..d7d4d4d 100644
 +    user: User = Depends(get_current_user),
 +    authorize: bool = Depends(authorize_user),
  ):
-     if not authorized:
