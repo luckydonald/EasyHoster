@@ -1,49 +1,24 @@
 from pathlib import Path
-from typing import Annotated, Optional, Union
+from typing import Annotated, Optional
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
 
-from fastapi import UploadFile, File, HTTPException, Depends, Header, APIRouter
+from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 import os
 import uuid
 import shutil
-from passlib.context import CryptContext
-from fastapi_jwt_auth import AuthJWT
-from fastapi_jwt_auth.exceptions import AuthJWTException
 
-from pydantic.v1 import UUID5
-
-from ..auth.models import FullUser
-
-
-BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
+from .depends import Bucket, UploadedFile
+from ..auth.depends import AuthenticatedAdmin
 
 bucket = APIRouter()
 
 
 # Directory to store uploaded files
 UPLOAD_DIR = Path("uploads")
-
-# Dependency for authorization
-def get_current_user(
-    authorize: Annotated[Union[str, None], Header()] = None
-) -> User:
-    try:
-        AuthJWT().jwt_required()
-        username = AuthJWT().get_jwt_subject()
-        if username not in users:
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-        return users[username]
-    except AuthJWTException:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-def authorize_user(user: User = Depends(get_current_user)):
-    if user.username != "admin":
-        raise HTTPException(status_code=403, detail="Not authorized to perform this action")
-    return True
 
 # Ensure the upload directory exists
 UPLOAD_DIR.mkdir(exist_ok=True)
@@ -55,38 +30,12 @@ class FileMetadata(BaseModel):
     uploaded_at: str
     version: int
     file_id: str
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-# JWT settings
-@AuthJWT.load_config
-def get_config():
-    return JWTSettings()
-
-class JWTSettings(BaseModel):
-    authjwt_secret_key: str = "your-secret-key"
-
-class User(BaseModel):
-    username: str
-    hashed_password: str
-
-# In-memory storage for users (could be replaced with a database)
-users = {
-    "admin": User(username="admin", hashed_password=pwd_context.hash("admin_password"))
-}
-
-
-# Dependency for authorization (dummy implementation)
-def authorize_user():
-    # Implement your authorization logic here
-    return True
-# end def
+# end class
 
 
 class Meta(BaseModel):
-    bucket: Annotated[str, Doc("Where it's stored in")] = Field(pattern=BUCKET_PATTERN)
+    bucket: Bucket
     file_id: Annotated[uuid.UUID, Doc("new UUID file name.")]
-
     filename: Annotated[Optional[str], Doc("The original file name.")]
     size: Annotated[Optional[int], Doc("The size of the file in bytes.")]
     content_type: Annotated[
@@ -99,12 +48,11 @@ class Meta(BaseModel):
 
 @bucket.post("/upload/{bucket}")
 async def upload_file(
-    bucket: str = Field(pattern=BUCKET_PATTERN),
-    file: UploadFile = File(...),
-    authorized: bool = Depends(authorize_user),
-    user: FullUser = Depends(get_current_user),
+    bucket: Bucket,
+    file: UploadedFile,
+    user: AuthenticatedAdmin,
 ):
-    if not authorized:
+    if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
 
     file_id = uuid.uuid4()
@@ -133,10 +81,10 @@ async def upload_file(
 # end def
 
 
-@bucket.get("/files/{bucket}/{file_id}")
+@bucket.get("/file/{bucket}/{file_id}")
 async def get_file(
     file_id: uuid.UUID,
-    bucket: str = Field(pattern=BUCKET_PATTERN),
+    bucket: Bucket,
     dl: bool = False,
 ):
     if file_id not in metadata_store:
