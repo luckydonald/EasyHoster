@@ -1,11 +1,28 @@
-from pydantic import BaseModel
-from typing import Optional
+from pydantic import BaseModel, TypeAdapter
+from typing import Literal
+
+
+Role = Literal["admin", "normal"]
+Roles = list[Role]
+
+type Username = str
 
 class UserCreate(BaseModel):
-    username: str
+    username: Username
     password: str
-    role: Optional[str] = "normal"
+    roles: Roles
+# end class
+
 
 class User(BaseModel):
-    username: str
-    role: str
+    username: Username
+    roles: Roles
+# end class
+
+class StoredUser(BaseModel):
+    password: str
+    roles: Roles
+
+StoredUsers = dict[Username, StoredUser]
+
+StoredUsersAdapter = TypeAdapter[StoredUsers](StoredUsers)
