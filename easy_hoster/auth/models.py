@@ -102,7 +102,7 @@ class FullUser(ApiUser, StoredUser, SharedUserData):
     pass
     # username: see ApiUser
     # password: see StoredUser
-    # roles: see StoredUser
+    # roles: see SharedUserData
 
     def to_api(self) -> ApiUser:
         return ApiUser(
