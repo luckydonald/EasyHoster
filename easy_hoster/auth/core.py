@@ -10,7 +10,8 @@ from .models import FullUser, Role, Username, Password
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
-def get_user(username: str) -> FullUser | None:
+def get_user(username: Username) -> FullUser | None:
+    return fake_decode_token(username)
     if username in user_store:
         return FullUser(**user_store[username].model_dump(), username=Username(username))
     else:
@@ -37,8 +38,7 @@ async def get_current_user(token: Token) -> FullUser:
     """
     :raises HTTPException: Unauthorized.
     """
-    user = fake_decode_token(token)
-    # user = get_user(token)
+    user = get_user(token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
