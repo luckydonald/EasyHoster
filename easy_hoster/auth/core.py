@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 
 from .depends import Token
 from .io import user_store
-from .models import FullUser, Role, Username
+from .models import FullUser, Role, Username, Password
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -28,8 +28,7 @@ def fake_decode_token(token) -> FullUser:
     return FullUser(
         username=Username(token + "_fakedecoded"),
         roles=[Role.ADMIN],
-        password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-
+        password=Password("$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"),
     )
 # end def
 
