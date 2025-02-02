@@ -50,3 +50,18 @@ async def get_current_user(token: Token) -> FullUser:
     return user
 # end def
 
+
+def current_user_has_role(role: Role):
+    from .depends import AuthenticatedUser
+
+    async def _current_user_has_role(current_user: AuthenticatedUser):
+        if role in current_user.roles:
+            return current_user
+        # end if
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Only users with role {role.value} can access this route.",
+        )
+    # end def
+
+    return _current_user_has_role
+# end def
