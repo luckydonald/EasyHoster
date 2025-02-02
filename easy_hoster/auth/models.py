@@ -1,8 +1,12 @@
 from abc import abstractmethod
+from datetime import datetime
 from enum import StrEnum
-from typing import Literal, NewType, TypedDict, cast as hint
+from typing import Literal, NewType, TypedDict, cast as hint, Annotated
+from typing_extensions import Doc
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from .utils import now
 
 
 class Role(StrEnum):
@@ -121,3 +125,16 @@ class FullUser(ApiUser, StoredUser, SharedUserData):
         return self.model_copy()
     # end def
 # end class
+
+
+class Token(BaseModel):
+    access_token: Annotated[str, Doc("The access token, jwt encoded & signed.")]
+    token_type: str
+# end class
+
+
+class TokenData(BaseModel):
+    username: str
+    expires_at: datetime = Field(default_factory=now)
+# end class
+

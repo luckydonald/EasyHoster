@@ -1,8 +1,13 @@
+from datetime import timedelta
+
 from fastapi import APIRouter, HTTPException
 
 from .crypt import verify_password, hash_password
 from .depends import OAuthPasswordForm
+from .models import Token, TokenData
 from .io import user_store
+from .env import TOKEN_EXPIRE_MINUTES
+from .token import create_access_token
 
 oauth_password = APIRouter()
 
@@ -21,5 +26,11 @@ async def login(form_data: OAuthPasswordForm):
         raise HTTPException(status_code=400, detail="Incorrect username or password")
     # end if
 
-    return {"access_token": user.username, "token_type": "bearer"}
+    access_token_expires = timedelta(minutes=TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data=TokenData(
+            username=user.username,
+        ), expires_delta=access_token_expires
+    )
+    return Token(access_token=access_token, token_type="bearer")
 # end def
