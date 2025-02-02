@@ -32,6 +32,7 @@ def is_admin(user: FullUser) -> bool:
     return "admin" in user.roles
 # end def
 
+
 def fake_decode_token(token) -> FullUser:
     return FullUser(
         username=Username(token + "_fakedecoded"),
