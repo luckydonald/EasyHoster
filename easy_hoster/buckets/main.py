@@ -56,6 +56,10 @@ async def upload_file(
         data.foo = file.filename
         f.write(meta.model_dump_json())
     # end with
+
+    with open(file_location, "wb") as f:
+        shutil.copyfileobj(file.file, f)
+    # end with
 # end def
 
 
