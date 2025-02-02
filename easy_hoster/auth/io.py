@@ -4,10 +4,24 @@ from json import JSONDecodeError
 from pathlib import Path
 from .models import StoredUsers, StoredUser, Username, Password, DatabaseV1, Role
 
-__all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE"]
+__all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE", "dump_db"]
 
 
 USER_DATA_FILE = Path("user_data.json")
+
+
+def dump_db(db: DatabaseV1, file: Path):
+    with open(file, "w") as f:
+        json.dump(
+            obj=db.model_dump(
+                mode="json",
+            ),
+            fp=f,
+            ensure_ascii=False,
+            indent=2,
+        )
+    # end with
+# end def
 
 
 def load_user_data(data_file: Path) -> StoredUsers:
@@ -30,16 +44,7 @@ def load_user_data(data_file: Path) -> StoredUsers:
         )
 
         data_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(data_file, "w") as f:
-            json.dump(
-                obj=user_data.model_dump(
-                    mode="json",
-                ),
-                fp=f,
-                ensure_ascii=False,
-                indent=2,
-            )
-        # end with
+        dump_db(user_data, data_file)
     # end if
 
     return user_data.users
@@ -47,16 +52,8 @@ def load_user_data(data_file: Path) -> StoredUsers:
 
 
 def save_user_data(data_file: Path, user_data: StoredUsers):
-    with open(file=data_file, mode="w") as f:
-        json.dump(
-            obj=DatabaseV1(users=user_data).model_dump(
-                mode="json",
-            ),
-            fp=f,
-            ensure_ascii=False,
-            indent=2,
-        )
-    # end with
+    obj = DatabaseV1(users=user_data)
+    dump_db(obj, data_file)
 # end def
 
 
