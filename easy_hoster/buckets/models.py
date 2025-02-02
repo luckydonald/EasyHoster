@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from ..auth.models import Username
+from ..auth.models import Username, AccessLevel
 
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
@@ -19,6 +19,7 @@ class FileMetadata(BaseModel):
     file_id: Annotated[UUID, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
     original_name: Annotated[str | None, Doc("The original file name.")]
     size: Annotated[int | None, Doc("The size of the file in bytes.")]
+    access_level: Annotated[AccessLevel, Doc("The access level of the file. If a role can access the file. The empty key is for anonymous access.")]
     uploaded_by: Username
     uploaded_at: datetime
     content_type: Annotated[str | None, Doc("The content type of the request, from the headers.")]

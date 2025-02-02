@@ -11,7 +11,7 @@ from .io import write_meta
 from .models import Bucket
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
-
+from ..auth.models import AccessLevel
 
 bucket = APIRouter()
 
@@ -26,6 +26,7 @@ async def upload_file(
     file: UploadedFile,
     user: AuthenticatedAdmin,
     now: Now,
+    access_level: AccessLevel,
 ):
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
@@ -38,6 +39,7 @@ async def upload_file(
     meta = FileMetadataWithBucket(
         bucket=bucket,
         file_id=file_id,
+        access_level=access_level,
         original_name=file.filename,
         size=file.size,
         uploaded_by=user.username,

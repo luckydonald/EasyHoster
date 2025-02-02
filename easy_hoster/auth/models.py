@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from enum import StrEnum
-from typing import Literal, NewType
+from typing import Literal, NewType, TypedDict, cast as hint
 
 from pydantic import BaseModel
 
@@ -9,6 +9,18 @@ class Role(StrEnum):
     ADMIN = "admin"
     NORMAL = "normal"
 # end class
+
+
+# noinspection PyArgumentList
+AccessLevel = TypedDict(
+    "AccessLevel",
+    (
+        { str(hint(Role, role).value) : bool for role in Role }
+        |
+        {"": bool}
+    ),
+    total=True,
+)
 
 
 Roles = list[Role]
