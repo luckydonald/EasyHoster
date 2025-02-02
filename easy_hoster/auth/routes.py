@@ -3,8 +3,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
 from .core import get_user, verify_password, get_current_user, is_admin, get_password_hash
+from .depends import AuthenticatedUser
 from .io import user_store
-from .models import User, StoredUser, Role
+from .models import FullUser, StoredUser, Role, ApiUser
 
 auth = APIRouter()
 
@@ -74,3 +75,7 @@ async def foobar(current_user: dict = Depends(get_current_user)):
     # end if
 # end def
 
+@auth.get("/me", response_model=ApiUser, status_code=status.HTTP_201_CREATED)
+async def read_users_me(current_user: AuthenticatedUser):
+    return current_user.to_api()
+# end def
