@@ -12,14 +12,14 @@ from .models import Bucket, FileId, AccessLevel
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 
-bucket = APIRouter()
+buckets = APIRouter()
 
 
 # Ensure the upload directory exists
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-@bucket.post("/upload/{bucket}")
+@buckets.post("/upload/{bucket}")
 async def upload_file(
     bucket: Bucket,
     file: UploadedFile,
@@ -54,7 +54,7 @@ async def upload_file(
 # end def
 
 
-@bucket.get("/file/{bucket}/{file_id}")
+@buckets.get("/file/{bucket}/{file_id}")
 async def get_file(
     file_id: FileId,
     bucket: Bucket,
@@ -70,7 +70,7 @@ async def get_file(
 # end def
 
 
-@bucket.get("/metadata/{bucket}/{file_id}", response_model=FileMetadataWithBucket)
+@buckets.get("/metadata/{bucket}/{file_id}", response_model=FileMetadataWithBucket)
 async def get_metadata(
     file_id: FileId,
     bucket: Bucket,

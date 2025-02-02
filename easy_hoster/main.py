@@ -4,11 +4,11 @@ from starlette.middleware.cors import CORSMiddleware
 from .auth.depends import Token
 from .auth.routes import auth
 from .auth.constants import ROUTE_PREFIX as AUTH_ROUTE_PREFIX
-from .buckets.routes import bucket
+from .buckets.routes import buckets
 
 app = FastAPI()
 
-app.include_router(bucket, tags=["bucket"])
+app.include_router(buckets, tags=["bucket"])
 app.include_router(auth, prefix=AUTH_ROUTE_PREFIX, tags=["auth"])
 
 
