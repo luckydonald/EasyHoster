@@ -37,7 +37,7 @@ def load_user_data(data_file: Path) -> StoredUsers:
         user_data = DatabaseV1(
             users={
                 Username("admin"): StoredUser(
-                    password=Password("$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"),  # "password"
+                    password=Password("$2b$12$iCy.Wt24HKv7clUwhmtB9ecWu1tzdUI2qLvMVXp1fGyZERZUhDOoS"),  # "password"
                     roles=[Role.ADMIN],
                 ),
             },
