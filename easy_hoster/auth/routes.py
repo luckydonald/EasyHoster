@@ -4,7 +4,7 @@ from starlette import status
 
 from .core import get_user, verify_password, get_current_user, is_admin, get_password_hash
 from .io import user_store
-from .models import User, StoredUser
+from .models import User, StoredUser, Role
 
 auth = APIRouter()
 
@@ -27,7 +27,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 async def create_user(
     username: str,
     password: str,
-    role: str = "normal",
+    role: Role = Role.NORMAL,
     current_user: User = Depends(get_current_user),
 ):
     if not is_admin(current_user):

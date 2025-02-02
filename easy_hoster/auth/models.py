@@ -1,8 +1,14 @@
+from enum import StrEnum
+
 from pydantic import BaseModel, TypeAdapter
-from typing import Literal
 
 
-Role = Literal["admin", "normal"]
+class Role(StrEnum):
+    ADMIN = "admin"
+    NORMAL = "normal"
+# end class
+
+
 Roles = list[Role]
 
 type Username = str
