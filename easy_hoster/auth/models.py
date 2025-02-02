@@ -1,4 +1,5 @@
 from enum import StrEnum
+from typing import Literal
 
 from pydantic import BaseModel, TypeAdapter
 
@@ -23,6 +24,15 @@ class StoredUser(BaseModel):
 StoredUsers = dict[Username, StoredUser]
 
 StoredUsersAdapter = TypeAdapter[StoredUsers](StoredUsers)
+
+
+class DatabaseV1():
+    version: Literal[1] = 1
+    users: StoredUsers
+# end class
+
+
+type DatabaseLatest = DatabaseV1
 
 
 class User(StoredUser):

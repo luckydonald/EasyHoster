@@ -1,8 +1,7 @@
 # Load user data from JSON file
 import json
 from pathlib import Path
-from .models import StoredUsers, StoredUser, StoredUsersAdapter, Username
-
+from .models import StoredUsers, StoredUser, Username, DatabaseV1, Roles
 
 __all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE"]
 
@@ -14,30 +13,34 @@ def load_user_data(data_file: Path) -> StoredUsers:
     if data_file.exists():
         with open(data_file, "r") as f:
             user_data = json.load(f)
-            user_data = StoredUsersAdapter.validate_python(user_data)
+            user_data = DatabaseV1(**user_data)
         # end with
     else:
-        user_data: StoredUsers = {
-            "admin": StoredUser(
-                password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
-                roles=["admin"],
-            ),
-        }
-        user_data = StoredUsersAdapter.validate_python(user_data)
+        user_data = DatabaseV1(
+            users={
+                "admin": StoredUser(
+                    password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+                    roles=[Roles.ADMIN],
+                ),
+            },
+        )
+
         data_file.parent.mkdir(parents=True, exist_ok=True)
         with open(data_file, "w") as f:
             json.dump(user_data, f)
         # end with
     # end if
 
-    return user_data
+    return user_data.users
 # end def
 
 
 def save_user_data(data_file: Path, user_data: StoredUsers):
     with open(file=data_file, mode="w") as f:
         json.dump(
-            obj=StoredUsersAdapter.dump_python(user_data),
+            obj=DatabaseV1(users=user_data).model_dump(
+                mode="json",
+            ),
             fp=f,
             ensure_ascii=False,
             indent=2,
