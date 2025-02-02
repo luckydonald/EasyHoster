@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 from .models import FileMetadata, FileMetadataWithBucket
@@ -21,7 +22,8 @@ async def read_meta(
     path: Path,
 ) -> FileMetadata:
     with open(path, "r") as f:
-        data = f.read()
+        data = json.load(f)
     # end with
+
     return FileMetadata(**data)
 # end def
