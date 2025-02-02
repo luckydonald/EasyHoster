@@ -1,1 +1,1 @@
-ROUTE_PREFIX = 'auth'
+ROUTE_PREFIX = '/auth'
