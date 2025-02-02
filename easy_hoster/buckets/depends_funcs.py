@@ -4,19 +4,14 @@ __all__ = (
     'current_user_has_effective_role_matching_meta',
 )
 
-from datetime import datetime, timezone
 from fastapi import HTTPException
 
 from .paths import get_file_metadata
 from ..auth.core import current_user_has_role, error_if_forbidden
 from ..auth.depends import AuthenticatedUser, AuthenticatedUserOrNone
 from ..auth.models import Role, FullUser
+from ..auth.utils import now
 from .models import EffectiveRole, Bucket, FileId
-
-
-def now() -> datetime:
-    return datetime.now(tz=timezone.utc)
-# end def
 
 
 def current_user_has_effective_role(role: Role | EffectiveRole):
