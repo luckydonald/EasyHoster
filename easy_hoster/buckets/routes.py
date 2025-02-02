@@ -8,7 +8,7 @@ import shutil
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
 from .depends import UploadedFile, Now
 from .io import write_meta
-from .models import Bucket
+from .models import Bucket, FileId
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 from ..auth.models import AccessLevel
@@ -57,7 +57,7 @@ async def upload_file(
 
 @bucket.get("/file/{bucket}/{file_id}")
 async def get_file(
-    file_id: UUID,
+    file_id: FileId,
     bucket: Bucket,
     dl: bool = False,
 ):
@@ -72,7 +72,7 @@ async def get_file(
 
 @bucket.get("/metadata/{bucket}/{file_id}", response_model=FileMetadataWithBucket)
 async def get_metadata(
-    file_id: UUID,
+    file_id: FileId,
     bucket: Bucket,
 ):
     info = await get_file_metadata(bucket, file_id)

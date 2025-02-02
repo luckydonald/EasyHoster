@@ -2,7 +2,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 
-from .models import Bucket, GetFilePaths, GetFileMetadata
+from .models import Bucket, FileId, GetFilePaths, GetFileMetadata
 from .io import read_meta
 
 from pathlib import Path
@@ -14,7 +14,7 @@ UPLOAD_DIR = Path("uploads")
 
 def calculate_file_paths(
     bucket: Bucket,
-    file_id: UUID,
+    file_id: FileId,
 ) -> GetFilePaths:
     folder = UPLOAD_DIR / bucket
     file_location = folder / f"{file_id}.blob"
@@ -25,7 +25,7 @@ def calculate_file_paths(
 
 async def check_file_paths(
     bucket: Bucket,
-    file_id: UUID,
+    file_id: FileId,
 ) -> GetFilePaths:
     locations = calculate_file_paths(bucket, file_id)
     if not locations.file.exists():
@@ -40,7 +40,7 @@ async def check_file_paths(
 
 async def get_file_metadata(
     bucket: Bucket,
-    file_id: UUID,
+    file_id: FileId,
 ) -> GetFileMetadata:
     locations = await check_file_paths(bucket, file_id)
     meta = await read_meta(locations.meta)

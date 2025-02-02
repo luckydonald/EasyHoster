@@ -13,10 +13,11 @@ from ..auth.models import Username, AccessLevel
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
 Bucket = Annotated[str, Doc("Where it's stored in"), Field(pattern=BUCKET_PATTERN)]
+FileId = Annotated[UUID, Doc("The UUID of the file.")]
 
 
 class FileMetadata(BaseModel):
-    file_id: Annotated[UUID, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
+    file_id: Annotated[FileId, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
     original_name: Annotated[str | None, Doc("The original file name.")]
     size: Annotated[int | None, Doc("The size of the file in bytes.")]
     access_level: Annotated[AccessLevel, Doc("The access level of the file. If a role can access the file. The empty key is for anonymous access.")]
