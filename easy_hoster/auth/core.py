@@ -7,7 +7,9 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
 
-app = FastAPI()
+from fastapi import APIRouter
+
+auth = APIRouter()
 
 
 # Load user data from JSON file
@@ -49,6 +51,8 @@ def get_user(username: str):
         return None
     # end if
 # end def
+
+
 def is_admin(user: dict):
     return user["role"] == "admin"
 # end def
@@ -71,7 +75,7 @@ async def get_current_active_user(current_user: dict = Depends(get_current_user)
 # end def
 
 
-@app.post("/token")
+@auth.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = get_user(form_data.username)
     if not user or not verify_password(form_data.password, user["password"]):
@@ -85,7 +89,7 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 # end def
 
 
-@app.post("/users")
+@auth.post("/users")
 async def create_user(
     username: str,
     password: str,
@@ -111,7 +115,18 @@ async def create_user(
 # end def
 
 
-@app.get("/foobar")
+@auth.get("/test/normal")
+async def foobar(current_user: dict = Depends(get_current_active_user)):
+    if current_user["role"] == "normal":
+        return {"message": "Foobar for normal users"}
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Only normal users can access this route"
+        )
+    # end if
+# end def
+
+@auth.get("/test/admin")
 async def foobar(current_user: dict = Depends(get_current_active_user)):
     if current_user["role"] == "normal":
         return {"message": "Foobar for normal users"}
