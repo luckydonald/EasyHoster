@@ -1,7 +1,7 @@
 from enum import StrEnum
 from typing import Literal
 
-from pydantic import BaseModel, TypeAdapter
+from pydantic import BaseModel
 
 
 class Role(StrEnum):
@@ -22,8 +22,6 @@ class StoredUser(BaseModel):
 
 
 StoredUsers = dict[Username, StoredUser]
-
-StoredUsersAdapter = TypeAdapter[StoredUsers](StoredUsers)
 
 
 class DatabaseV1():
