@@ -19,7 +19,7 @@ def calculate_file_paths(
     folder = UPLOAD_DIR / bucket
     file_location = folder / f"{file_id}.blob"
     meta_location = folder / f"{file_id}.meta"
-    return GetFilePaths(file_location, meta_location)
+    return GetFilePaths(file_location, meta_location, folder)
 # end def
 
 

@@ -32,7 +32,7 @@ async def upload_file(
 
     file_id = uuid6.uuid7()
     locations = calculate_file_paths(bucket, file_id)
-    locations.file.parent.mkdir(exist_ok=True)
+    locations.bucket.mkdir(exist_ok=True)
 
     meta = FileMetadataWithBucket(
         bucket=bucket,

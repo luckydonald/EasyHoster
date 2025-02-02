@@ -62,6 +62,7 @@ class FileMetadataWithBucket(FileMetadata):
 class GetFilePaths(NamedTuple):
     file: Path
     meta: Path
+    bucket: Path
 # end class
 
 
