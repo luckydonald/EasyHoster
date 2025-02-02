@@ -1,3 +1,9 @@
+__all__ = (
+    "OAuthPasswordForm",
+    "Token",
+    "AuthenticatedUser",
+)
+
 from typing import Annotated
 
 from fastapi import Depends
