@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from .crypt import verify_password
+from .crypt import verify_password, hash_password
 from .depends import OAuthPasswordForm
 from .io import user_store
 
@@ -24,3 +24,12 @@ async def login(form_data: OAuthPasswordForm):
 
     return {"access_token": user.username, "token_type": "bearer"}
 # end def
+
+
+
+
+@oauth_password.post("/hash_password")
+async def login(form_data: OAuthPasswordForm):
+    return {"hash": hash_password(form_data.password)}
+# end def
+
