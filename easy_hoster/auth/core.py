@@ -34,6 +34,19 @@ def fake_decode_token(token) -> FullUser:
 # end def
 
 
+
+async def has_current_user(token: Token) -> bool:
+    user = get_user(token)
+    return bool(user)
+# end def
+
+
+async def get_current_user_or_none(token: Token) -> FullUser:
+    user = get_user(token)
+    return user
+# end def
+
+
 async def get_current_user(token: Token) -> FullUser:
     """
     :raises HTTPException: Unauthorized.
