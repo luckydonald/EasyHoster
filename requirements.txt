@@ -1,2 +1,8 @@
+# webserver:
 fastapi==0.115.7
 pydantic==2.10.6
+
+# auth:
+passlib
+bcrypt
+python-multipart
