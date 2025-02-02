@@ -31,12 +31,20 @@ EffectiveRole = StrEnum('EffectiveRole', [(hint(StrEnum, i).name, hint(StrEnum, 
 AccessLevel = TypedDict(
     "AccessLevel",
     (
-        { str(hint(StrEnum, role).value) : bool for role in EffectiveRole }
+        {
+            str(hint(StrEnum, role).value) : bool
+            for role
+            in EffectiveRole
+        }
     ),
     total=True,
 )
 
-access_level_defaults = { str(hint(StrEnum, role).value) : False for role in EffectiveRole }
+access_level_defaults = {
+    str(hint(StrEnum, role).value) : False
+    for role
+    in EffectiveRole
+}
 
 AccessLevel = Annotated[AccessLevel, Doc("The access level of the file, based on the roles."), Field(examples=[access_level_defaults])]
 
