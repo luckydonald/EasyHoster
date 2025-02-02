@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from .core import get_user, verify_password, get_current_user, is_admin, hash_password
+from .core import get_user, get_current_user, is_admin
+from .crypt import hash_password, verify_password
 from .depends import AuthenticatedUser
 from .io import user_store
 from .models import FullUser, StoredUser, Role, ApiUser

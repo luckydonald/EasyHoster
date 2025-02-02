@@ -1,22 +1,13 @@
-import json
+from fastapi import HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from passlib.context import CryptContext
+
 from .depends import Token
 from .io import user_store
-from .models import FullUser, Role, ApiUser, Username
+from .models import FullUser, Role, Username
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-def hash_password(password):
-    return pwd_context.hash(password)
-# end def
-
-def verify_password(*, password, hash):
-    return pwd_context.verify(password, hash)
-# end def
 
 
 def get_user(username: str) -> FullUser | None:

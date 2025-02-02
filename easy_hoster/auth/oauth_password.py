@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
 
-from .core import verify_password
+from .crypt import verify_password
 from .depends import OAuthPasswordForm
 from .io import user_store
 
