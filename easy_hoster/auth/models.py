@@ -67,7 +67,7 @@ class StoredUser(SharedUserData):
 StoredUsers = dict[Username, StoredUser]
 
 
-class DatabaseV1():
+class DatabaseV1(BaseModel):
     version: Literal[1] = 1
     users: StoredUsers
 # end class

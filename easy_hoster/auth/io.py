@@ -1,7 +1,8 @@
 # Load user data from JSON file
 import json
+from json import JSONDecodeError
 from pathlib import Path
-from .models import StoredUsers, StoredUser, Username, DatabaseV1, Roles
+from .models import StoredUsers, StoredUser, Username, Password, DatabaseV1, Role
 
 __all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE"]
 
@@ -10,24 +11,34 @@ USER_DATA_FILE = Path("user_data.json")
 
 
 def load_user_data(data_file: Path) -> StoredUsers:
-    if data_file.exists():
+    try:
+        if not data_file.exists():
+            raise FileNotFoundError()
+        # end if
         with open(data_file, "r") as f:
             user_data = json.load(f)
             user_data = DatabaseV1(**user_data)
         # end with
-    else:
+    except (FileNotFoundError, JSONDecodeError):
         user_data = DatabaseV1(
             users={
-                "admin": StoredUser(
-                    password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
-                    roles=[Roles.ADMIN],
+                Username("admin"): StoredUser(
+                    password=Password("$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW"),  # "password"
+                    roles=[Role.ADMIN],
                 ),
             },
         )
 
         data_file.parent.mkdir(parents=True, exist_ok=True)
         with open(data_file, "w") as f:
-            json.dump(user_data, f)
+            json.dump(
+                obj=user_data.model_dump(
+                    mode="json",
+                ),
+                fp=f,
+                ensure_ascii=False,
+                indent=2,
+            )
         # end with
     # end if
 
