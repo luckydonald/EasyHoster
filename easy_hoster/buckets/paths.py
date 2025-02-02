@@ -12,20 +12,29 @@ from pathlib import Path
 UPLOAD_DIR = Path("uploads")
 
 
-async def check_file_paths(
+def calculate_file_paths(
     bucket: Bucket,
     file_id: UUID,
 ) -> GetFilePaths:
     folder = UPLOAD_DIR / bucket
     file_location = folder / f"{file_id}.blob"
     meta_location = folder / f"{file_id}.meta"
-    if not file_location.exists():
+    return GetFilePaths(file_location, meta_location)
+# end def
+
+
+async def check_file_paths(
+    bucket: Bucket,
+    file_id: UUID,
+) -> GetFilePaths:
+    locations = calculate_file_paths(bucket, file_id)
+    if not locations.file.exists():
         raise HTTPException(status_code=404, detail="File not found on disk")
     # end if
-    if not meta_location.exists():
+    if not locations.meta.exists():
         raise HTTPException(status_code=404, detail="Metadata not found on disk")
     # end def
-    return GetFilePaths(file_location, meta_location)
+    return locations
 # end def
 
 

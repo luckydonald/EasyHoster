@@ -5,7 +5,7 @@ from uuid import UUID
 import uuid6
 import shutil
 
-from .paths import UPLOAD_DIR, check_file_paths
+from .paths import UPLOAD_DIR, check_file_paths, calculate_file_paths
 from .depends import UploadedFile, Now
 from .io import write_meta
 from .models import Bucket
@@ -31,10 +31,8 @@ async def upload_file(
     # end if
 
     file_id = uuid6.uuid7()
-    folder = UPLOAD_DIR / bucket
-    folder.mkdir(exist_ok=True)
-    file_location = folder / f"{file_id!s}.blob"
-    meta_location = folder / f"{file_id!s}.meta"
+    locations = calculate_file_paths(bucket, file_id)
+    locations.file.parent.mkdir(exist_ok=True)
 
     meta = FileMetadataWithBucket(
         bucket=bucket,
@@ -46,9 +44,9 @@ async def upload_file(
         content_type=file.content_type,
         headers=file.headers,
     )
-    await write_meta(meta_location, meta)
+    await write_meta(locations.meta, meta)
 
-    with open(file_location, "wb") as f:
+    with open(locations.file, "wb") as f:
         shutil.copyfileobj(file.file, f)
     # end with
 # end def
