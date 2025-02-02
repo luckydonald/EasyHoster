@@ -12,7 +12,7 @@ from pathlib import Path
 UPLOAD_DIR = Path("uploads")
 
 
-async def get_file_paths(
+async def check_file_paths(
     bucket: Bucket,
     file_id: UUID,
 ) -> GetFilePaths:

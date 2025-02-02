@@ -9,7 +9,7 @@ import os
 import uuid6
 import shutil
 
-from .paths import UPLOAD_DIR, get_file_paths
+from .paths import UPLOAD_DIR, check_file_paths
 from .depends import UploadedFile, Now
 from .io import write_meta
 from .models import Bucket
@@ -64,7 +64,7 @@ async def get_file(
     bucket: Bucket,
     dl: bool = False,
 ):
-    locations = await get_file_paths(bucket, file_id)
+    locations = await check_file_paths(bucket, file_id)
     if dl:
         return FileResponse(locations.file, media_type='application/octet-stream', filename=metadata_store[file_id].original_name)
     else:
@@ -79,7 +79,7 @@ async def get_metadata(
     bucket: Bucket,
     dl: bool = False,
 ):
-    locations = await get_file_paths(bucket, file_id)
+    locations = await check_file_paths(bucket, file_id)
     if file_id not in metadata_store:
         raise HTTPException(status_code=404, detail="Metadata not found")
     # end if
