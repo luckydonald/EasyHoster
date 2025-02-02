@@ -28,7 +28,7 @@ class FileMetadata(BaseModel):
         return self
     # end def
 
-    def as_with_bucket(self, bucket: Bucket) -> 'FileMetadataWithBucket':
+    def as_with_bucket(self, *, bucket: Bucket) -> 'FileMetadataWithBucket':
         return FileMetadataWithBucket(
             bucket=bucket,
             **self.model_dump()

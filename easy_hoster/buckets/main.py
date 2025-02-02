@@ -12,6 +12,7 @@ from .models import Bucket
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 
+
 bucket = APIRouter()
 
 
