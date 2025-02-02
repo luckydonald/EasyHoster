@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Annotated
+from pathlib import Path
+from typing import Annotated, NamedTuple
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
@@ -57,3 +58,14 @@ class FileMetadataWithBucket(FileMetadata):
     # end def
 # end class
 
+
+class GetFilePaths(NamedTuple):
+    file: Path
+    meta: Path
+# end class
+
+
+class GetFileMetadata(NamedTuple):
+    file: Path
+    meta: FileMetadataWithBucket
+# end class
