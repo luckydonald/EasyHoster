@@ -1,9 +1,6 @@
 from pathlib import Path
 from typing import NamedTuple
 
-from starlette.datastructures import Headers
-from typing_extensions import Doc
-
 from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
 from uuid import UUID
