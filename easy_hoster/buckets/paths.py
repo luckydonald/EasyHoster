@@ -3,6 +3,7 @@ from uuid import UUID
 from fastapi import HTTPException
 
 from .models import Bucket, GetFilePaths, GetFileMetadata
+from .io import read_meta
 
 from pathlib import Path
 
@@ -33,8 +34,6 @@ async def get_file_metadata(
     file_id: UUID,
 ) -> GetFileMetadata:
     locations = await get_file_paths(bucket, file_id)
-    with open(locations.meta) as f:
-        data = f.read()
-    # end with
-    return GetFileMetadata(locations.file, data)
+    meta = read_meta(locations.meta)
+    return GetFileMetadata(locations.file, meta)
 # end def

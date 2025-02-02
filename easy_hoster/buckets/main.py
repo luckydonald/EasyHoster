@@ -11,6 +11,7 @@ import shutil
 
 from .paths import UPLOAD_DIR, get_file_paths
 from .depends import UploadedFile, Now
+from .io import write_meta
 from .models import Bucket
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
@@ -49,11 +50,7 @@ async def upload_file(
         content_type=file.content_type,
         headers=file.headers,
     )
-    with open(meta_location, "w") as f:
-        data = object()
-        data.foo = file.filename
-        f.write(meta.model_dump_json())
-    # end with
+    await write_meta(meta_location, meta)
 
     with open(file_location, "wb") as f:
         shutil.copyfileobj(file.file, f)
