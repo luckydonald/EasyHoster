@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, NamedTuple, Mapping
+from typing import Annotated, NamedTuple, Mapping, TypedDict, cast as hint
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
@@ -8,7 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from ..auth.models import Username, AccessLevel
+from ..auth.models import Username, Role
 
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
