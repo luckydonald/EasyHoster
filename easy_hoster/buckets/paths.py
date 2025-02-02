@@ -18,10 +18,10 @@ async def get_file_paths(
     folder = UPLOAD_DIR / bucket
     file_location = folder / f"{file_id}.blob"
     meta_location = folder / f"{file_id}.meta"
-    if not os.path.exists(file_location):
+    if not file_location.exists():
         raise HTTPException(status_code=404, detail="File not found on disk")
     # end if
-    if not os.path.exists(meta_location):
+    if not meta_location.exists():
         raise HTTPException(status_code=404, detail="Metadata not found on disk")
     # end def
     return GetFilePaths(file_location, meta_location)
