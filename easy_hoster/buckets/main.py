@@ -12,6 +12,8 @@ import uuid
 import shutil
 
 from .depends import UploadedFile, Now
+from .models import Bucket
+from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 
 bucket = APIRouter()
@@ -22,28 +24,6 @@ UPLOAD_DIR = Path("uploads")
 
 # Ensure the upload directory exists
 UPLOAD_DIR.mkdir(exist_ok=True)
-
-# Metadata model
-class FileMetadata(BaseModel):
-    original_name: str
-    uploaded_by: str
-    uploaded_at: str
-    version: int
-    file_id: str
-# end class
-
-
-class Meta(BaseModel):
-    bucket: Bucket
-    file_id: Annotated[uuid.UUID, Doc("new UUID file name.")]
-    filename: Annotated[Optional[str], Doc("The original file name.")]
-    size: Annotated[Optional[int], Doc("The size of the file in bytes.")]
-    content_type: Annotated[
-        Optional[str], Doc("The content type of the request, from the headers.")
-    ]
-
-    headers: Annotated[Headers, Doc("The headers of the request.")]
-# end class
 
 
 @bucket.post("/upload/{bucket}")
@@ -62,13 +42,15 @@ async def upload_file(
     file_location = folder / f"{file_id!s}.blob"
     meta_location = folder / f"{file_id!s}.meta"
 
-    meta = Meta(
+    meta = FileMetadataWithBucket(
         bucket=bucket,
         file_id=file_id,
-        filename=file.filename,
+        original_name=file.filename,
         size=file.size,
-        headers=file.headers,
+        uploaded_by=user.username,
+        uploaded_at=now,
         content_type=file.content_type,
+        headers=file.headers,
     )
     with open(meta_location, "w") as f:
         data = object()
