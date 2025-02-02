@@ -165,8 +165,3 @@ async def get_metadata(file_id: str):
     # end if
     return metadata_store[file_id]
 # end def
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-# end if
