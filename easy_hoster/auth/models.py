@@ -11,18 +11,6 @@ class Role(StrEnum):
 # end class
 
 
-# noinspection PyArgumentList
-AccessLevel = TypedDict(
-    "AccessLevel",
-    (
-        { str(hint(Role, role).value) : bool for role in Role }
-        |
-        {"": bool}
-    ),
-    total=True,
-)
-
-
 Roles = list[Role]
 
 Username = NewType('Username', str)

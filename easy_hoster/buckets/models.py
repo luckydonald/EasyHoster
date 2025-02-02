@@ -16,6 +16,23 @@ Bucket = Annotated[str, Doc("Where it's stored in"), Field(pattern=BUCKET_PATTER
 FileId = Annotated[UUID, Doc("The UUID of the file.")]
 
 
+class EffectiveRole(Role):
+    UPLOADER = "uploader"
+    AUTHENTICATED = "authenticated"
+    UNAUTHENTICATED = "unauthenticated"
+# end class
+
+
+# noinspection PyArgumentList
+AccessLevel = TypedDict(
+    "AccessLevel",
+    (
+        { str(hint(EffectiveRole, role).value) : bool for role in Role }
+    ),
+    total=True,
+)
+
+
 class FileMetadata(BaseModel):
     file_id: Annotated[FileId, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
     original_name: Annotated[str | None, Doc("The original file name.")]
