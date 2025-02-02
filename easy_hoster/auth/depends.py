@@ -4,8 +4,10 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from .models import FullUser
+from .oauth_password import login, oauth_password
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=oauth_password.url_path_for(login.__name__))
 
 
 Token = Annotated[str, Depends(oauth2_scheme)]
