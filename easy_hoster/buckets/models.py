@@ -18,7 +18,6 @@ FileId = Annotated[UUID, Doc("The UUID of the file.")]
 
 class EffectiveRole(Role):
     UPLOADER = "uploader"
-    AUTHENTICATED = "authenticated"
     UNAUTHENTICATED = "unauthenticated"
 # end class
 
