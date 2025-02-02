@@ -3,13 +3,14 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
+from .constants import ROUTE_PREFIX
 from .models import FullUser
 
 OAuthPasswordForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 
 from .oauth_password import login, oauth_password
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=oauth_password.url_path_for(login.__name__))
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{ROUTE_PREFIX}{oauth_password.url_path_for(login.__name__)}")
 
 
 Token = Annotated[str, Depends(oauth2_scheme)]

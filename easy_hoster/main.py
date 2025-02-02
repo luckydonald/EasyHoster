@@ -3,10 +3,11 @@ from starlette.middleware.cors import CORSMiddleware
 
 from .auth.depends import Token
 from .auth.routes import auth
+from .auth.constants import ROUTE_PREFIX as AUTH_ROUTE_PREFIX
 
 app = FastAPI()
 
-app.include_router(auth)
+app.include_router(auth, prefix=AUTH_ROUTE_PREFIX, tags=["auth"])
 
 
 # CORS configuration
