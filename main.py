@@ -115,19 +115,23 @@ async def get_file(
 
     if not os.path.exists(file_location):
         raise HTTPException(status_code=404, detail="File not found on disk")
-
+    # end if
     if dl:
         return FileResponse(file_location, media_type='application/octet-stream', filename=metadata_store[file_id].original_name)
     else:
         return FileResponse(file_location)
+    # end if
+# end def
 
 @app.get("/metadata/{file_id}")
 async def get_metadata(file_id: str):
     if file_id not in metadata_store:
         raise HTTPException(status_code=404, detail="Metadata not found")
-
+    # end if
     return metadata_store[file_id]
+# end def
 
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+# end if
