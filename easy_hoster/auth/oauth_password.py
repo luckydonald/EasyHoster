@@ -10,6 +10,9 @@ oauth_password = APIRouter
 
 @oauth_password.post("/token")
 async def login(form_data: OAuthPasswordForm):
+    # if form_data.scopes != ["mango"]:
+    #     raise HTTPException(status_code=400, detail='Incorrect scope: Must be "mango".')
+    # '# end if
     stored_user = user_store.get(form_data.username)
     user = stored_user.to_full(username=form_data.username)
     if not user:
