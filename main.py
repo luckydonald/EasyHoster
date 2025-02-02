@@ -113,7 +113,7 @@ async def get_file(
     file_location = folder / f"{file_id}.blob"
     meta_location = folder / f"{file_id}.meta"
 
-    if not os.path.exists(file_location):
+    if not os.path.exists(file_location) or not os.path.exists(meta_location):
         raise HTTPException(status_code=404, detail="File not found on disk")
     # end if
     if dl:
