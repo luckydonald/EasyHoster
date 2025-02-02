@@ -6,12 +6,11 @@ import uuid6
 import shutil
 
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
-from .depends import UploadedFile, Now
+from .depends import UploadedFile, Now, AuthenticatedMatchesMeta
 from .io import write_meta
-from .models import Bucket, FileId
+from .models import Bucket, FileId, AccessLevel
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
-from ..auth.models import AccessLevel
 
 bucket = APIRouter()
 
@@ -59,6 +58,7 @@ async def upload_file(
 async def get_file(
     file_id: FileId,
     bucket: Bucket,
+    _: AuthenticatedMatchesMeta,
     dl: bool = False,
 ):
     info = await get_file_metadata(bucket, file_id)
@@ -74,6 +74,7 @@ async def get_file(
 async def get_metadata(
     file_id: FileId,
     bucket: Bucket,
+    _: AuthenticatedMatchesMeta,
 ):
     info = await get_file_metadata(bucket, file_id)
     return info.meta.as_with_bucket(bucket=bucket)

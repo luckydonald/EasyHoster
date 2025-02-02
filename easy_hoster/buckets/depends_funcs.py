@@ -1,9 +1,11 @@
 __all__ = (
     'now',
     'current_user_has_effective_role',
+    'current_user_has_effective_role_matching_meta',
 )
 
 from datetime import datetime, timezone
+from fastapi import HTTPException
 
 from .paths import get_file_metadata
 from ..auth.core import current_user_has_role, error_if_forbidden
@@ -52,3 +54,27 @@ def current_user_has_effective_role(role: Role | EffectiveRole):
         # end case
     # end match
 # end def
+
+
+async def current_user_has_effective_role_matching_meta(
+    current_user: AuthenticatedUser,
+    bucket: Bucket,
+    file_id: FileId,
+) -> FullUser | None:
+    info = await get_file_metadata(bucket, file_id)
+
+    for role in info.meta.allowed_roles:#
+        func = current_user_has_effective_role(role)
+        try:
+            try:
+                return await func(current_user=current_user, bucket=bucket, file_id=file_id)
+
+            except TypeError:
+                return await func(current_user=current_user)
+            # end try
+        except HTTPException:
+            continue
+        # end try
+    # end for
+    return None
+
