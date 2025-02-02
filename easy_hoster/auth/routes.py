@@ -13,7 +13,7 @@ auth = APIRouter()
 @auth.post("/token")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     user = get_user(form_data.username)
-    if not user or not verify_password(form_data.password, user.password):
+    if not user or not verify_password(password=form_data.password, hash=user.password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
