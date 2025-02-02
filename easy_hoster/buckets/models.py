@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from typing import Annotated, NamedTuple
+from typing import Annotated, NamedTuple, Mapping
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
@@ -22,7 +22,7 @@ class FileMetadata(BaseModel):
     uploaded_by: Username
     uploaded_at: datetime
     content_type: Annotated[str | None, Doc("The content type of the request, from the headers.")]
-    headers: Annotated[Headers, Doc("The headers of the request.")]
+    headers: Annotated[Mapping[str, str], Headers, Doc("The headers of the request."), Field(examples=[{"Content-Type": "image/jif"}])]
 
     def as_basic(self) -> 'FileMetadata':
         return self
