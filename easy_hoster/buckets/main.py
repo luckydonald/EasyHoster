@@ -4,9 +4,8 @@ from typing import Annotated, Optional, Union
 from starlette.datastructures import Headers
 from typing_extensions import Doc
 
-from fastapi import FastAPI, UploadFile, File, HTTPException, Depends, Header
+from fastapi import UploadFile, File, HTTPException, Depends, Header, APIRouter
 from fastapi.responses import FileResponse
-from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 import os
 import uuid
@@ -17,18 +16,13 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from pydantic.v1 import UUID5
 
+from ..auth.models import User
+
+
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
-app = FastAPI()
+bucket = APIRouter()
 
-# CORS configuration
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # Adjust this to your needs
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 # Directory to store uploaded files
 UPLOAD_DIR = Path("uploads")
@@ -103,7 +97,7 @@ class Meta(BaseModel):
 # end class
 
 
-@app.post("/upload/{bucket}")
+@bucket.post("/upload/{bucket}")
 async def upload_file(
     bucket: str = Field(pattern=BUCKET_PATTERN),
     file: UploadFile = File(...),
@@ -139,7 +133,7 @@ async def upload_file(
 # end def
 
 
-@app.get("/files/{bucket}/{file_id}")
+@bucket.get("/files/{bucket}/{file_id}")
 async def get_file(
     file_id: uuid.UUID,
     bucket: str = Field(pattern=BUCKET_PATTERN),
@@ -164,7 +158,7 @@ async def get_file(
     # end if
 # end def
 
-@app.get("/metadata/{file_id}")
+@bucket.get("/metadata/{file_id}")
 async def get_metadata(file_id: str):
     if file_id not in metadata_store:
         raise HTTPException(status_code=404, detail="Metadata not found")
