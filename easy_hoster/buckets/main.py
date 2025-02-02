@@ -11,7 +11,7 @@ import os
 import uuid
 import shutil
 
-from .depends import Bucket, UploadedFile
+from .depends import UploadedFile, Now
 from ..auth.depends import AuthenticatedAdmin
 
 bucket = APIRouter()
@@ -51,6 +51,7 @@ async def upload_file(
     bucket: Bucket,
     file: UploadedFile,
     user: AuthenticatedAdmin,
+    now: Now,
 ):
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")

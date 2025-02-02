@@ -1,5 +1,6 @@
 __all__ = (
     "UploadedFile",
+    "Now",
 )
 
 from datetime import datetime
@@ -7,8 +8,9 @@ from typing import Annotated
 
 from fastapi import UploadFile, File, Depends
 
+from .depends_funcs import now
+
 
 UploadedFile = Annotated[UploadFile, File(description="A file read as UploadFile")]
 
-Bucket = Annotated[str, Doc("Where it's stored in"), Field(pattern=BUCKET_PATTERN)]
-
+Now = Annotated[datetime, Depends(now)]
