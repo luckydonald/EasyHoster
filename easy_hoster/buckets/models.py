@@ -36,6 +36,10 @@ AccessLevel = TypedDict(
     total=True,
 )
 
+access_level_defaults = { str(hint(StrEnum, role).value) : False for role in EffectiveRole }
+
+AccessLevel = Annotated[AccessLevel, Doc("The access level of the file, based on the roles."), Field(examples=[access_level_defaults])]
+
 
 class FileMetadata(BaseModel):
     file_id: Annotated[FileId, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
