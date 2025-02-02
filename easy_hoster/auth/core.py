@@ -6,30 +6,13 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
+from .io import user_store
+from .models import User
+
 
 from fastapi import APIRouter
 
 auth = APIRouter()
-
-
-# Load user data from JSON file
-USER_DATA_FILE = Path("user_data.json")
-
-
-if os.path.exists(USER_DATA_FILE):
-    with open(USER_DATA_FILE, "r") as f:
-        user_data = json.load(f)
-else:
-    user_data = {
-        "admin": {
-            "password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
-            "role": "admin"
-        }
-    }
-    with open(USER_DATA_FILE, "w") as f:
-        json.dump(user_data, f)
-    # end with
-# end if
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -44,17 +27,17 @@ def verify_password(plain_password, hashed_password):
 # end def
 
 
-def get_user(username: str):
-    if username in user_data:
-        return user_data[username]
+def get_user(username: str) -> User | None:
+    if username in user_store:
+        return User(**user_store[username].model_dump(), username=username)
     else:
         return None
     # end if
 # end def
 
 
-def is_admin(user: dict):
-    return user["role"] == "admin"
+def is_admin(user: User) -> bool:
+    return "admin" in user.roles
 # end def
 
 
@@ -68,10 +51,6 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         )
     # end if
     return user
-# end def
-
-async def get_current_active_user(current_user: dict = Depends(get_current_user)):
-    return current_user
 # end def
 
 
@@ -94,7 +73,7 @@ async def create_user(
     username: str,
     password: str,
     role: str = "normal",
-    current_user: dict = Depends(get_current_active_user),
+    current_user: User = Depends(get_current_user),
 ):
     if not is_admin(current_user):
         raise HTTPException(
@@ -116,7 +95,7 @@ async def create_user(
 
 
 @auth.get("/test/normal")
-async def foobar(current_user: dict = Depends(get_current_active_user)):
+async def foobar(current_user: dict = Depends(get_current_user)):
     if current_user["role"] == "normal":
         return {"message": "Foobar for normal users"}
     else:
@@ -127,7 +106,7 @@ async def foobar(current_user: dict = Depends(get_current_active_user)):
 # end def
 
 @auth.get("/test/admin")
-async def foobar(current_user: dict = Depends(get_current_active_user)):
+async def foobar(current_user: dict = Depends(get_current_user)):
     if current_user["role"] == "normal":
         return {"message": "Foobar for normal users"}
     else:

@@ -3,6 +3,10 @@ import json
 from pathlib import Path
 from .models import StoredUsers, StoredUser, StoredUsersAdapter, Username
 
+
+__all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE"]
+
+
 USER_DATA_FILE = Path("user_data.json")
 
 
@@ -58,9 +62,29 @@ class UserStore():
         save_user_data(self.data_file, self.user_data)
     # end def
 
-    def set_user_data(self, user: Username, data: StoredUser):
+    def has(self, user: Username):
+        return user in self.user_data
+    # end def
+
+    def get(self, user: Username, default=None):
+        return self.user_data.get(user, default)
+    # end def
+
+    def set(self, user: Username, data: StoredUser):
         self.user_data.update({user: data})
         self.save_user_data()
+    # end def
+
+    def __setitem__(self, user: Username, data: StoredUser):
+        self.set(user, data)
+    # end def
+
+    def __getitem__(self, user: Username):
+        return self.get(user)
+    # end def
+
+    def __contains__(self, user: Username):
+        return self.has(user)
     # end def
 # end class
 

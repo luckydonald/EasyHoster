@@ -7,22 +7,20 @@ Roles = list[Role]
 
 type Username = str
 
-class UserCreate(BaseModel):
-    username: Username
-    password: str
-    roles: Roles
-# end class
-
-
-class User(BaseModel):
-    username: Username
-    roles: Roles
-# end class
 
 class StoredUser(BaseModel):
     password: str
     roles: Roles
+# end class
+
 
 StoredUsers = dict[Username, StoredUser]
 
 StoredUsersAdapter = TypeAdapter[StoredUsers](StoredUsers)
+
+
+class User(StoredUser):
+    username: Username
+    # password: see StoredUser
+    # roles: see StoredUser
+# end class
