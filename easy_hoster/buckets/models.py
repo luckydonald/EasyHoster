@@ -1,4 +1,6 @@
 from datetime import datetime
+from enum import StrEnum
+from itertools import chain
 from pathlib import Path
 from typing import Annotated, NamedTuple, Mapping, TypedDict, cast as hint
 
@@ -16,10 +18,13 @@ Bucket = Annotated[str, Doc("Where it's stored in"), Field(pattern=BUCKET_PATTER
 FileId = Annotated[UUID, Doc("The UUID of the file.")]
 
 
-class EffectiveRole(Role):
+class EffectiveRoleAdditions(StrEnum):
     UPLOADER = "uploader"
     UNAUTHENTICATED = "unauthenticated"
 # end class
+
+
+EffectiveRole = StrEnum('EffectiveRole', [(i.name, i.value) for i in chain(Role, EffectiveRoleAdditions)])
 
 
 # noinspection PyArgumentList
