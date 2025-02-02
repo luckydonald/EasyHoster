@@ -16,7 +16,7 @@ from fastapi_jwt_auth.exceptions import AuthJWTException
 
 from pydantic.v1 import UUID5
 
-from ..auth.models import User
+from ..auth.models import FullUser
 
 
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
@@ -102,7 +102,7 @@ async def upload_file(
     bucket: str = Field(pattern=BUCKET_PATTERN),
     file: UploadFile = File(...),
     authorized: bool = Depends(authorize_user),
-    user: User = Depends(get_current_user),
+    user: FullUser = Depends(get_current_user),
 ):
     if not authorized:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")

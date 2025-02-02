@@ -23,12 +23,12 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
 # end def
 
 
-@auth.post("/users", response_model=User, status_code=status.HTTP_201_CREATED)
+@auth.post("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def create_user(
     username: str,
     password: str,
     role: Role = Role.NORMAL,
-    current_user: User = Depends(get_current_user),
+    current_user: FullUser = Depends(get_current_user),
 ):
     if not is_admin(current_user):
         raise HTTPException(

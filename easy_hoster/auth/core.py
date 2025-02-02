@@ -5,8 +5,7 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from passlib.context import CryptContext
 
 from .io import user_store
-from .models import User
-
+from .models import FullUser, Role, ApiUser, Username
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
@@ -20,16 +19,16 @@ def verify_password(plain_password, hashed_password):
 # end def
 
 
-def get_user(username: str) -> User | None:
+def get_user(username: str) -> FullUser | None:
     if username in user_store:
-        return User(**user_store[username].model_dump(), username=username)
+        return FullUser(**user_store[username].model_dump(), username=username)
     else:
         return None
     # end if
 # end def
 
 
-def is_admin(user: User) -> bool:
+def is_admin(user: FullUser) -> bool:
     return "admin" in user.roles
 # end def
 

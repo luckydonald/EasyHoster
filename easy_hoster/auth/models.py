@@ -1,3 +1,4 @@
+from abc import abstractmethod
 from enum import StrEnum
 from typing import Literal
 
@@ -13,11 +14,53 @@ class Role(StrEnum):
 Roles = list[Role]
 
 type Username = str
+type Password = str
 
 
-class StoredUser(BaseModel):
-    password: str
+class ToFullInterface:
+    @abstractmethod
+    def to_full(self, *args, **kwargs) -> "FullUser":
+        ...
+    # end def
+# end class
+
+
+class SharedUserData(BaseModel, ToFullInterface):
+    """
+    Data both in the DB and in the API responses.
+    """
     roles: Roles
+
+    # noinspection PyMethodOverriding
+    def to_full(
+        self,
+        username: Username,
+        password: Password
+    ) -> "FullUser":
+        return FullUser(
+            username=username,
+            password=password,
+            roles=self.roles,
+        )
+    # end def
+# end class
+
+
+class StoredUser(SharedUserData):
+    password: Password
+    # roles: see SharedUserData
+
+    # noinspection PyMethodOverriding
+    def to_full(
+        self,
+        username: Username,
+    ) -> "FullUser":
+        return FullUser(
+            username=username,
+            password=self.password,
+            roles=self.roles,
+        )
+    # end def
 # end class
 
 
@@ -33,8 +76,48 @@ class DatabaseV1():
 type DatabaseLatest = DatabaseV1
 
 
-class User(StoredUser):
+
+class ApiUser(SharedUserData):
     username: Username
+
+    # noinspection PyMethodOverriding
+    def to_full(
+        self,
+        password: Password
+    ) -> "FullUser":
+        return FullUser(
+            username=self.username,
+            password=password,
+            roles=self.roles,
+        )
+    # end def
+# end class
+
+
+class FullUser(ApiUser, StoredUser, SharedUserData):
+    pass
+    # username: see ApiUser
     # password: see StoredUser
     # roles: see StoredUser
+
+    def to_api(self) -> ApiUser:
+        return ApiUser(
+            username=self.username,
+            roles=self.roles,
+        )
+    # end def
+
+    def to_stored(self) -> StoredUser:
+        return StoredUser(
+            password=self.password,
+            roles=self.roles,
+        )
+    # end def
+
+    # noinspection PyMethodOverriding
+    def to_full(
+        self,
+    ) -> "FullUser":
+        return self.model_copy()
+    # end def
 # end class
