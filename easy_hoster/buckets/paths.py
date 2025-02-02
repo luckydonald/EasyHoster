@@ -44,5 +44,5 @@ async def get_file_metadata(
 ) -> GetFileMetadata:
     locations = await check_file_paths(bucket, file_id)
     meta = await read_meta(locations.meta)
-    return GetFileMetadata(locations.file, meta)
+    return GetFileMetadata(locations, meta)
 # end def

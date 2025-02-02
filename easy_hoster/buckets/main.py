@@ -61,9 +61,9 @@ async def get_file(
 ):
     info = await get_file_metadata(bucket, file_id)
     if dl:
-        return FileResponse(info.file, media_type='application/octet-stream', filename=info.meta.original_name)
+        return FileResponse(info.locations.file, media_type='application/octet-stream', filename=info.meta.original_name)
     else:
-        return FileResponse(info.file)
+        return FileResponse(info.locations.file)
     # end if
 # end def
 
