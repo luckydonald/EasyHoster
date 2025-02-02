@@ -1,16 +1,11 @@
 __all__ = (
     "UploadedFile",
-    "Bucket",
 )
 
+from datetime import datetime
 from typing import Annotated
 
-from pydantic import Field
-from typing_extensions import Doc
-
-from fastapi import UploadFile, File
-
-from .models import BUCKET_PATTERN
+from fastapi import UploadFile, File, Depends
 
 
 UploadedFile = Annotated[UploadFile, File(description="A file read as UploadFile")]
