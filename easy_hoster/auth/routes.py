@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from starlette import status
 
-from .core import get_user, verify_password, get_current_user, is_admin, get_password_hash
+from .core import get_user, verify_password, get_current_user, is_admin, hash_password
 from .depends import AuthenticatedUser
 from .io import user_store
 from .models import FullUser, StoredUser, Role, ApiUser
@@ -41,7 +41,7 @@ async def create_user(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Username already exists"
         )
     # end if
-    hashed_password = get_password_hash(password)
+    hashed_password = hash_password(password)
 
     new_user = StoredUser(
         password=hashed_password,
