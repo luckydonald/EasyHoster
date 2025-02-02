@@ -66,7 +66,7 @@ async def get_current_user(token: Token) -> FullUser:
 def current_user_has_role(role: Role):
     from .depends import AuthenticatedUser
 
-    async def _current_user_has_role(current_user: AuthenticatedUser):
+    async def _current_user_has_role(current_user: AuthenticatedUser) -> FullUser:
         return error_if_forbidden(
             allowed=role in current_user.roles,
             role=role,
