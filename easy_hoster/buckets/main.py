@@ -72,7 +72,6 @@ async def get_file(
 async def get_metadata(
     file_id: UUID,
     bucket: Bucket,
-    dl: bool = False,
 ):
     info = await get_file_metadata(bucket, file_id)
     return info.meta.as_with_bucket(bucket=bucket)
