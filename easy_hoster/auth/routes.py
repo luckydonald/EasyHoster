@@ -6,24 +6,11 @@ from .core import get_user, get_current_user, is_admin
 from .crypt import hash_password, verify_password
 from .depends import AuthenticatedUser
 from .io import user_store
-from .models import FullUser, StoredUser, Role, ApiUser
+from .models import FullUser, StoredUser, Role, ApiUser, Password
+from .oauth_password import oauth_password
 
 auth = APIRouter()
-
-
-@auth.post("/token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = get_user(form_data.username)
-    if not user or not verify_password(password=form_data.password, hash=user.password):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    # end if
-    return {"access_token": form_data.username, "token_type": "bearer"}
-# end def
-
+auth.include_router(oauth_password)
 
 @auth.post("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def create_user(
@@ -76,7 +63,16 @@ async def foobar(current_user: dict = Depends(get_current_user)):
     # end if
 # end def
 
+
 @auth.get("/me", response_model=ApiUser, status_code=status.HTTP_201_CREATED)
 async def read_users_me(current_user: AuthenticatedUser):
     return current_user.to_api()
 # end def
+
+
+@auth.post("/hash_password")
+async def login(password: Password):
+    """ Helper route to hash a password, for manually putting it to the database/json config."""
+    return {"hash": hash_password(password)}
+# end def
+
