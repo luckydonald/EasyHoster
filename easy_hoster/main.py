@@ -1,9 +1,13 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from easy_hoster.auth.depends import Token
+from .auth.depends import Token
+from .auth.oauth_password import oauth_password
 
 app = FastAPI()
+
+app.include_router(oauth_password)
+
 
 # CORS configuration
 app.add_middleware(

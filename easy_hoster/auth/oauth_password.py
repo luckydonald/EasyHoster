@@ -5,7 +5,7 @@ from .depends import OAuthPasswordForm
 from .io import user_store
 
 
-oauth_password = APIRouter
+oauth_password = APIRouter()
 
 
 @oauth_password.post("/token")
