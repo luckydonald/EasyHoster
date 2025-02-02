@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 from .crypt import verify_password, hash_password
 from .depends import OAuthPasswordForm
 from .io import user_store
-
+from .models import Password
 
 oauth_password = APIRouter()
 
@@ -26,10 +26,9 @@ async def login(form_data: OAuthPasswordForm):
 # end def
 
 
-
-
 @oauth_password.post("/hash_password")
-async def login(form_data: OAuthPasswordForm):
-    return {"hash": hash_password(form_data.password)}
+async def login(password: Password):
+    """ Helper route to hash a password, for manually putting it to the database/json config."""
+    return {"hash": hash_password(password)}
 # end def
 
