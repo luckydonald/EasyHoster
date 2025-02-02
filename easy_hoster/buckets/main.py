@@ -1,14 +1,15 @@
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import NamedTuple
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
 
 from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, Field
+from uuid import UUID
+
 import os
-import uuid
+import uuid6
 import shutil
 
 from .depends import UploadedFile, Now
@@ -35,8 +36,9 @@ async def upload_file(
 ):
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
+    # end if
 
-    file_id = uuid.uuid4()
+    file_id = uuid6.uuid7()
     folder = UPLOAD_DIR / bucket
     folder.mkdir(exist_ok=True)
     file_location = folder / f"{file_id!s}.blob"
@@ -66,7 +68,7 @@ async def upload_file(
 
 @bucket.get("/file/{bucket}/{file_id}")
 async def get_file(
-    file_id: uuid.UUID,
+    file_id: UUID,
     bucket: Bucket,
     dl: bool = False,
 ):
@@ -89,8 +91,11 @@ async def get_file(
     # end if
 # end def
 
-@bucket.get("/metadata/{file_id}")
-async def get_metadata(file_id: str):
+
+@bucket.get("/metadata/file_id}")
+async def get_metadata(
+    file_id: UUID,
+):
     if file_id not in metadata_store:
         raise HTTPException(status_code=404, detail="Metadata not found")
     # end if

@@ -7,3 +7,6 @@ passlib
 bcrypt
 # python-multipart included in fastapi[standard]
 pyjwt[crypto]
+
+# bucket stuff:
+uuid6
