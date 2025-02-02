@@ -32,9 +32,22 @@ def is_admin(user: FullUser) -> bool:
     return "admin" in user.roles
 # end def
 
+def fake_decode_token(token) -> FullUser:
+    return FullUser(
+        username=Username(token + "_fakedecoded"),
+        roles=[Role.ADMIN],
+        password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
-    user = get_user(token)
+    )
+# end def
+
+
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> FullUser:
+    """
+    :raises HTTPException: Unauthorized.
+    """
+    user = fake_decode_token(token)
+    # user = get_user(token)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
