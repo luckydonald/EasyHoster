@@ -24,14 +24,14 @@ class EffectiveRoleAdditions(StrEnum):
 # end class
 
 
-EffectiveRole = StrEnum('EffectiveRole', [(i.name, i.value) for i in chain(Role, EffectiveRoleAdditions)])
+EffectiveRole = StrEnum('EffectiveRole', [(hint(StrEnum, i).name, hint(StrEnum, i).value) for i in chain(Role, EffectiveRoleAdditions)])
 
 
 # noinspection PyArgumentList
 AccessLevel = TypedDict(
     "AccessLevel",
     (
-        { str(hint(EffectiveRole, role).value) : bool for role in Role }
+        { str(hint(StrEnum, role).value) : bool for role in EffectiveRole }
     ),
     total=True,
 )
