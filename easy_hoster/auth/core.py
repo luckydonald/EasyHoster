@@ -21,7 +21,7 @@ def verify_password(plain_password, hashed_password):
 
 def get_user(username: str) -> FullUser | None:
     if username in user_store:
-        return FullUser(**user_store[username].model_dump(), username=username)
+        return FullUser(**user_store[username].model_dump(), username=Username(username))
     else:
         return None
     # end if

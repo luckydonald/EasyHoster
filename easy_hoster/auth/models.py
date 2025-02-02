@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from enum import StrEnum
-from typing import Literal
+from typing import Literal, NewType
 
 from pydantic import BaseModel
 
@@ -13,8 +13,8 @@ class Role(StrEnum):
 
 Roles = list[Role]
 
-type Username = str
-type Password = str
+Username = NewType('Username', str)
+Password = NewType('Password', str)
 
 
 class ToFullInterface:
