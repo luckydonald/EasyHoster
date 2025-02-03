@@ -12,18 +12,11 @@ from ..token import create_access_token
 
 oauth_password = APIRouter()
 
-async def get_OAuthPasswordForm():
-    """ This function is neeed to load the Import later, so we don't have import loops. """
-    from ..depends import OAuthPasswordForm
 
-    def inner(form_data: OAuthPasswordForm):
-        return form_data
-    # end def
-    return inner
-# end def
+OAuthPasswordForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 @oauth_password.post("/token")
-async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends(get_OAuthPasswordForm)]) -> Token:
+async def login(form_data: OAuthPasswordForm) -> Token:
     # if form_data.scopes != ["mango"]:
     #     raise HTTPException(status_code=400, detail='Incorrect scope: Must be "mango".')
     # '# end if
