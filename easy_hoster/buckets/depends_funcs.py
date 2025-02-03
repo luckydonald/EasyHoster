@@ -61,13 +61,13 @@ async def current_user_has_effective_role_matching_meta(
 ) -> FullUser | Literal[True] | None:
     info = await get_file_metadata(bucket, file_id)
     if current_user is None:
-        if info.meta.allowed_roles[EffectiveRole.UNAUTHENTICATED]:
+        if info.meta.allowed_roles.unauthenticated:
             return True
         # end if
         raise CREDENTIALS_EXCEPTION
     # end if
 
-    for role, should_check in info.meta.allowed_roles:#
+    for role, should_check in info.meta.allowed_roles:
         if not should_check:
             continue
         # end if
