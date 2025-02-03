@@ -8,7 +8,7 @@ from starlette.datastructures import Headers
 from typing_extensions import Doc
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, create_model
 
 from ..auth.models import Username, Role
 
@@ -27,22 +27,27 @@ class EffectiveRoleAdditions(StrEnum):
 EffectiveRole = StrEnum('EffectiveRole', [(hint(StrEnum, i).name, hint(StrEnum, i).value) for i in chain(Role, EffectiveRoleAdditions)])
 
 
+access_level_defaults: dict[EffectiveRole, bool] = {
+    EffectiveRole.ADMIN: True,
+    EffectiveRole.NORMAL: False,
+    EffectiveRole.UPLOADER: True,
+    EffectiveRole.UNAUTHENTICATED: False,
+}
+
 # noinspection PyArgumentList
-AccessLevel = BaseModel.create_model(
-    model_name="AccessLevel",
+AccessLevel = create_model(
+    "AccessLevel",
     __doc__="The allowed roles for this file.",
     **{
         # https://docs.pydantic.dev/2.10/api/base_model/#pydantic.create_model
         # <name> : (<type>, <default value>),
         # <name> : (<type>, <pydantic.Field(…)>), or
         # <name> : typing.Annotated[<type>, <pydantic.Field(…)>]
-        str(hint(StrEnum, role).value) : (bool, False)
+        str(hint(StrEnum, role).value) : (bool, Field(examples=[access_level_defaults.get(role, False)]))
         for role
         in EffectiveRole
     }
 )
-
-AccessLevel = Annotated[AccessLevel, Doc("The access level of the file, based on the roles."), Field(examples=[access_level_defaults])]
 
 
 class FileMetadata(BaseModel):
