@@ -58,12 +58,14 @@ async def current_user_has_effective_role_matching_meta(
 ) -> FullUser | None:
     info = await get_file_metadata(bucket, file_id)
 
-    for role in info.meta.allowed_roles:#
+    for role, should_check in info.meta.allowed_roles:#
+        if not should_check:
+            continue
+        # end if
         func = current_user_has_effective_role(role)
         try:
             try:
                 return await func(current_user=current_user, bucket=bucket, file_id=file_id)
-
             except TypeError:
                 return await func(current_user=current_user)
             # end try

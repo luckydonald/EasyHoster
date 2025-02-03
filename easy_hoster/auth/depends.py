@@ -21,7 +21,7 @@ OAuthPasswordForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 
 
 from .oauth_password import login, oauth_password
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{ROUTE_PREFIX}{oauth_password.url_path_for(login.__name__)}")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{ROUTE_PREFIX}{oauth_password.url_path_for(login.__name__)}", auto_error=False)
 
 
 Token = Annotated[str, Depends(oauth2_scheme)]
