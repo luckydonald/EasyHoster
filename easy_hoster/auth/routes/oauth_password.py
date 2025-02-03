@@ -20,6 +20,9 @@ async def login(form_data: OAuthPasswordForm) -> Token:
     # if form_data.scopes != ["mango"]:
     #     raise HTTPException(status_code=400, detail='Incorrect scope: Must be "mango".')
     # '# end if
+    if form_data.username not in user_store:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    # end if
     stored_user = user_store.get(form_data.username)
     user = stored_user.to_full(username=form_data.username)
     if not user:
