@@ -1,12 +1,8 @@
-from uuid import UUID
-
 from fastapi import HTTPException
+from pathlib import Path
 
 from .models import Bucket, FileId, GetFilePaths, GetFileMetadata
 from .io import read_meta
-
-from pathlib import Path
-
 
 # Directory to store uploaded files
 UPLOAD_DIR = Path("uploads")
