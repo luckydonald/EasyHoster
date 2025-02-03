@@ -4,6 +4,8 @@ from fastapi.responses import FileResponse
 import uuid6
 import shutil
 
+from starlette import status
+
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
 from .io import write_meta
@@ -80,3 +82,26 @@ async def get_metadata(
     info = await get_file_metadata(bucket, file_id)
     return info.meta.as_with_bucket(bucket=bucket)
 # end def
+
+
+@buckets.delete("/file/{bucket}/{file_id}")
+async def delete_file(
+    _: AuthenticatedUploader,
+    file_id: FileId,
+    bucket: Bucket,
+) -> None:
+    locations = calculate_file_paths(bucket, file_id)
+    something_existed: bool = False
+    if locations.file.exists():
+        locations.file.unlink()
+        something_existed = True
+    # end if
+    if locations.meta.exists():
+        locations.meta.unlink()
+        something_existed = True
+    # end if
+    if not something_existed:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
+    # end if
+    raise HTTPException(status_code=status.HTTP_410_GONE, detail="Deleted")
+# end if
