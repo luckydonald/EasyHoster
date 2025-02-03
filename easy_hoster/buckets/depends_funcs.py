@@ -9,12 +9,11 @@ from typing import Literal
 from fastapi import HTTPException
 
 from .paths import get_file_metadata
-from ..auth.constants import CREDENTIALS_EXCEPTION
 from ..auth.core import current_user_has_role, error_if_forbidden
 from ..auth.depends import AuthenticatedUser, AuthenticatedUserOrNone
 from ..auth.models import Role, FullUser
 from ..auth.utils import now
-from .models import EffectiveRole, Bucket, FileId
+from .models import EffectiveRole, Bucket, FileId, GetFileMetadata
 
 
 def current_user_has_effective_role(role: Role | EffectiveRole):
@@ -58,17 +57,38 @@ async def current_user_has_effective_role_matching_meta(
     current_user: AuthenticatedUserOrNone,
     bucket: Bucket,
     file_id: FileId,
-) -> FullUser | Literal[True] | None:
+) -> FullUser | Literal[True]:
     info = await get_file_metadata(bucket, file_id)
+    result = await current_user_has_effective_role_matching_meta_or_none(
+        current_user=current_user,
+        bucket=bucket,
+        file_id=file_id,
+        info=info,
+    )
+    if result is None:
+        allowed_roles = [role for role, should_check in info.meta.allowed_roles if should_check]
+        raise HTTPException(
+            status_code=403,
+            detail=f"User does not have access. One of the following roles is required: {allowed_roles!r}",
+        )
+    # end if
+# end def
+
+async def current_user_has_effective_role_matching_meta_or_none(
+    *,
+    current_user: AuthenticatedUserOrNone,
+    bucket: Bucket,
+    file_id: FileId,
+    info: GetFileMetadata | None = None,
+) -> FullUser | Literal[True] | None:
+    if not info:
+        info = await get_file_metadata(bucket, file_id)
+    # end if
     if current_user is None:
         if info.meta.allowed_roles.unauthenticated:
             return True
         # end if
-        raise error_if_forbidden[None](
-            allowed=False,
-            role=EffectiveRole.UNAUTHENTICATED,
-            user=None,
-        )
+        return None
     # end if
 
     for role, should_check in info.meta.allowed_roles:
