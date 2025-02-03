@@ -1,12 +1,15 @@
+from abc import abstractmethod
 from datetime import datetime
 from enum import StrEnum
 from itertools import chain
 from pathlib import Path
-from typing import Annotated, NamedTuple, Mapping, TypedDict, cast as hint
+from typing import Annotated, NamedTuple, Mapping, cast as hint
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 from starlette.datastructures import Headers
+from starlette.requests import Request
 from typing_extensions import Doc
-from pydantic import BaseModel, Field, create_model
+from pydantic import BaseModel, Field, create_model, HttpUrl
 
 from .utils.new_uuids import UUID7
 from ..auth.models import Username, Role
@@ -49,7 +52,7 @@ AllowedRoles = create_model(
 )
 
 
-class FileMetadata(BaseModel):
+class BaseFileMetadata(BaseModel):
     file_id: Annotated[FileId, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
     original_name: Annotated[str | None, Doc("The original file name.")]
     size: Annotated[int | None, Doc("The size of the file in bytes.")]
@@ -57,6 +60,29 @@ class FileMetadata(BaseModel):
     uploaded_by: Username
     uploaded_at: datetime
     content_type: Annotated[str | None, Doc("The content type of the request, from the headers.")]
+
+    @abstractmethod
+    def as_basic(self) -> 'FileMetadata':
+        pass
+    # end def
+
+    @abstractmethod
+    def as_with_bucket(self, *, bucket: Bucket) -> 'FileMetadataWithBucket':
+        pass
+    # end def
+
+    @abstractmethod
+    def as_api(
+        self,
+        *,
+        request: Request,
+    ) -> 'FileMetadataForApi':
+        pass
+    # end def
+# end class
+
+
+class FileMetadata(BaseFileMetadata):
     headers: Annotated[Mapping[str, str], Headers, Doc("The headers of the request."), Field(examples=[{"Content-Type": "image/jif"}])]
 
     def as_basic(self) -> 'FileMetadata':
@@ -69,7 +95,49 @@ class FileMetadata(BaseModel):
             **self.model_dump()
         )
     # end def
+
+    # noinspection PyMethodOverriding
+    def as_api(
+        self,
+        *,
+        request: Request,
+        bucket: Bucket,
+    ) -> 'FileMetadataForApi':
+        return self.as_with_bucket(bucket=bucket).as_api(request=request)
+    # end def
 # end class
+
+
+def add_query(url: str | HttpUrl, **kwargs: str | bool) -> str:
+    from starlette.convertors import CONVERTOR_TYPES
+    from uuid import UUID
+
+    parsed = urlparse(str(url))
+    query = parse_qs(parsed.query)
+    for key, value in kwargs.items():
+        if key not in query:
+            query[key] = []
+        # end if
+        if isinstance(value, int):
+            converter = CONVERTOR_TYPES['int']
+        elif isinstance(value, float):
+            converter = CONVERTOR_TYPES['float']
+        elif isinstance(value, str):
+            converter = CONVERTOR_TYPES['str']
+        elif isinstance(value, UUID):
+            converter = CONVERTOR_TYPES['uuid']
+        else:
+            converter = CONVERTOR_TYPES['str']
+        # end if
+        str_value = converter.to_string(value)
+
+        query[key].append(str_value)
+    # end for
+    new_query = urlencode(query, doseq=True)
+    new_parsed: tuple[str] = parsed._replace(query=new_query)
+    new_url = urlunparse(new_parsed)
+    return new_url
+# end def
 
 
 class FileMetadataWithBucket(FileMetadata):
@@ -84,11 +152,60 @@ class FileMetadataWithBucket(FileMetadata):
             uploaded_at=self.uploaded_at,
             content_type=self.content_type,
             headers=self.headers,
+            allowed_roles=self.allowed_roles,
         )
     # end def
 
     # noinspection PyMethodOverriding
     def as_with_bucket(self) -> 'FileMetadataWithBucket':
+        return self
+    # end def
+
+    # noinspection PyMethodOverriding
+    def as_api(
+        self,
+        *,
+        request: Request,
+    ) -> 'FileMetadataForApi':
+        from .routes import get_file
+        return FileMetadataForApi(
+            # inherit everything except headers
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k != "headers"
+            },
+            # add embed_link and download_link.
+            **{
+                k: add_query(request.url_for(get_file.__name__, file_id=self.file_id, bucket=self.bucket), dl=dl)
+                for k, dl in (('embed_link', False), ('download_link', True),)
+            }
+        )
+    # end def
+# end class
+
+
+class FileMetadataForApi(BaseFileMetadata):
+    bucket: Bucket
+    embed_link: HttpUrl
+    download_link: HttpUrl
+
+    def as_basic(self) -> FileMetadata:
+        return self.as_with_bucket().as_basic()
+    # end def
+
+    def as_with_bucket(self) -> FileMetadataWithBucket:
+        return FileMetadataWithBucket(
+            **{
+                k: v
+                for k, v in self.model_dump().items()
+                if k not in ("embed_link", "download_link")
+            },
+        )
+    # end def
+
+    # noinspection PyMethodOverriding
+    def as_api(self) -> 'FileMetadataForApi':
         return self
     # end def
 # end class

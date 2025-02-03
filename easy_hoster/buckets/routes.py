@@ -9,12 +9,14 @@ import shutil
 import logging
 
 from starlette import status
+from starlette.requests import Request
 
 from .depends_funcs import current_user_has_effective_role
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
 from .io import write_meta, read_meta
-from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket, EffectiveRole
+from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket, EffectiveRole, \
+    FileMetadataForApi
 from ..auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
 
 
@@ -67,8 +69,9 @@ async def upload_file(
 @buckets.get("/{bucket}", status_code=201)
 async def list_bucket(
     current_user: AuthenticatedUserOrNone,
+    request: Request,
     bucket: Bucket,
-) -> list[FileMetadataWithBucket]:
+) -> list[FileMetadataForApi]:
     blob_files = []
     for meta_file in calculate_bucket_folder(bucket).glob("*.meta"):
         blob_file = meta_file.with_suffix(".blob")
@@ -99,7 +102,7 @@ async def list_bucket(
             if user is None and role is not EffectiveRole.UNAUTHENTICATED:
                 continue
             # end if
-            blob_files.append(meta.as_with_bucket(bucket=bucket))
+            blob_files.append(meta.as_api(request=request, bucket=bucket))
             break
         else:  # never did 'break' -> nothing found
             continue
