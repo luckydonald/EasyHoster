@@ -6,7 +6,7 @@ import uuid6
 import shutil
 
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
-from .depends import UploadedFile, Now, AuthenticatedMatchesMeta
+from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField
 from .io import write_meta
 from .models import Bucket, FileId, AccessLevel
 from .models import FileMetadataWithBucket
@@ -18,14 +18,14 @@ buckets = APIRouter()
 # Ensure the upload directory exists
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-
+from typing import get_args
 @buckets.post("/upload/{bucket}")
 async def upload_file(
     bucket: Bucket,
     file: UploadedFile,
     user: AuthenticatedAdmin,
     now: Now,
-    access_level: AccessLevel,
+    access_level: FormField(AccessLevel, 'access_level'),
 ):
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
