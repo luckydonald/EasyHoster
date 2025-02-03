@@ -28,14 +28,16 @@ logger = logging.getLogger(__name__)
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-@buckets.put("/{bucket}", response_model=UploadFileResult, status_code=201)
+@buckets.put("/{bucket}", status_code=201)
 async def upload_file(
     user: AuthenticatedAdmin,
+    request: Request,
+    *,
     bucket: Bucket,
     file: UploadedFile,
     now: Now,
     access_level: FormField(AllowedRoles, 'access_level'),
-):
+) -> FileMetadataForApi:
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
     # end if
@@ -60,9 +62,7 @@ async def upload_file(
     with open(locations.file, "wb") as f:
         shutil.copyfileobj(file.file, f)
     # end with
-    return UploadFileResult(
-        file_id=file_id,
-    )
+    return meta.as_api(request=request)
 # end def
 
 
@@ -121,9 +121,9 @@ async def get_file(
 ):
     info = await get_file_metadata(bucket, file_id)
     if dl:
-        return FileResponse(info.locations.file, media_type='application/octet-stream', filename=info.meta.original_name)
+        return FileResponse(path=info.locations.file, media_type='application/octet-stream', filename=info.meta.original_name)
     else:
-        return FileResponse(info.locations.file, media_type=info.meta.content_type, filename=info.meta.original_name)
+        return FileResponse(path=info.locations.file, media_type=info.meta.content_type)
     # end if
 # end def
 
