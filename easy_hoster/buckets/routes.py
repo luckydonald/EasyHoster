@@ -1,18 +1,24 @@
+
 from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
 
 import uuid6
+
 import shutil
+import logging
 
 from starlette import status
 
-from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
+from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
-from .io import write_meta
+from .io import write_meta, read_meta
 from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket
-from ..auth.depends import AuthenticatedAdmin
+from ..auth.core import current_user_has_role
+from ..auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
+
 
 buckets = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 # Ensure the upload directory exists
@@ -54,6 +60,39 @@ async def upload_file(
     return UploadFileResult(
         file_id=file_id,
     )
+# end def
+
+
+@buckets.get("/{bucket}", status_code=201)
+async def list_bucket(
+    user: AuthenticatedUserOrNone,
+    bucket: Bucket,
+) -> list[FileId]:
+    blob_files = []
+    for meta_file in calculate_bucket_folder(bucket).glob("*.meta"):
+        blob_file = meta_file.with_suffix(".blob")
+        file_id = FileId(meta_file.with_suffix('').name)
+        if not blob_file.exists():
+            logger.warning(f'Bucket {bucket} is missing data .blob for {file_id}.')
+            continue
+        # end def
+        meta = await read_meta(meta_file)
+        for role in meta.allowed_roles:
+            try:
+                user = current_user_has_role(role)
+            except HTTPException:
+                continue
+            # end try
+            if user is None:
+                continue
+            # end if
+            blob_files.append(file_id)
+            break
+        else:  # never did 'break' -> nothing found
+            continue
+        # end for
+    # end def
+    return blob_files
 # end def
 
 

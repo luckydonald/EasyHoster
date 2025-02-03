@@ -12,11 +12,19 @@ from pathlib import Path
 UPLOAD_DIR = Path("uploads")
 
 
+def calculate_bucket_folder(
+    bucket: Bucket,
+) -> Path:
+    folder = UPLOAD_DIR / bucket
+    return folder
+# end def
+
+
 def calculate_file_paths(
     bucket: Bucket,
     file_id: FileId,
 ) -> GetFilePaths:
-    folder = UPLOAD_DIR / bucket
+    folder = calculate_bucket_folder(bucket)
     file_location = folder / f"{file_id}.blob"
     meta_location = folder / f"{file_id}.meta"
     return GetFilePaths(file_location, meta_location, folder)
