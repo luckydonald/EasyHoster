@@ -63,14 +63,14 @@ class UserStore():
         self.data_file = data_file
         self.user_data = load_user_data(self.data_file)
 
-        self.load_user_data()
+        self.reload()
     # end def
 
-    def load_user_data(self):
+    def reload(self):
         self.user_data = load_user_data(self.data_file)
     # end def
 
-    def save_user_data(self):
+    def save(self):
         save_user_data(self.data_file, self.user_data)
     # end def
 
@@ -84,7 +84,7 @@ class UserStore():
 
     def set(self, user: Username, data: StoredUser):
         self.user_data.update({user: data})
-        self.save_user_data()
+        self.save()
     # end def
 
     def __setitem__(self, user: Username, data: StoredUser):
