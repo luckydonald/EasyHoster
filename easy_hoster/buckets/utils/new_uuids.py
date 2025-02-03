@@ -10,6 +10,24 @@ import uuid6
 import uuid
 
 
+def parse(value: int | str | bytes | UUID) -> UUID:
+    print(f'PARSING UUID: {value!r}')
+    if isinstance(value, int):
+        uuid = UUID(int=value)
+    elif isinstance(value, str):
+        uuid = UUID(value)
+    elif isinstance(value, bytes):
+        uuid = UUID(bytes=value)
+    elif isinstance(value, UUID):
+        uuid = value
+    else:
+        raise ValueError("Unrecognized format")
+    # end if
+    print(f'PARSED  UUID: {uuid!r}')
+    return uuid
+# end def
+
+
 @dataclass(slots=True)
 class UuidVersion:
     """A field metadata class to indicate a [UUID](https://pypi.org/project/uuid6/) version."""
@@ -57,19 +75,8 @@ class UuidVersion:
         value: Any,
         handler: core_schema.ValidatorFunctionWrapHandler,
     ) -> UUID:
-        uuid: UUID
         try:
-            if isinstance(value, int):
-                uuid = UUID(int=value)
-            elif isinstance(value, str):
-                uuid = UUID(value)
-            elif isinstance(value, bytes):
-                uuid = UUID(bytes=value)
-            elif isinstance(value, UUID):
-                uuid = value
-            else:
-                raise ValueError("Unrecognized format")
-            # end if
+            uuid: UUID = cls.parse(value)
         except ValueError as e:
             raise PydanticCustomError("uuid_format", "Unrecognized format")  # noqa: B904
         # end try
@@ -94,11 +101,17 @@ UUID8 = Annotated[UUID, UuidVersion[8]]
 
 
 def validate_uuid(val, version: Literal[1, 3, 4, 5, 6, 7, 8]) -> UUID:
-    if not isinstance(val, UUID):
+    print(f'PARSING UUIDv{version!r}: {val!r}')
+    uuid = parse(val)
+    if not isinstance(uuid, UUID):
         raise ValueError(f"Expected a UUID, got {type(val)}")
-    if val.version != version:
-        raise ValueError(f"Expected a UUID{version}, got UUID{val.version}")
-    return val
+    # end if
+    if uuid.version != version:
+        raise ValueError(f"Expected a UUID{version}, got UUID{uuid.version}")
+    # end if
+    return uuid
+# end def
+
 
 UUID7_2 = Annotated[
     UUID,
