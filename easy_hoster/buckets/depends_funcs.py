@@ -64,7 +64,11 @@ async def current_user_has_effective_role_matching_meta(
         if info.meta.allowed_roles.unauthenticated:
             return True
         # end if
-        raise CREDENTIALS_EXCEPTION
+        raise error_if_forbidden[None](
+            allowed=False,
+            role=EffectiveRole.UNAUTHENTICATED,
+            user=None,
+        )
     # end if
 
     for role, should_check in info.meta.allowed_roles:
