@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from starlette import status
 
 ROUTE_PREFIX = '/auth'
+OAUTH_ROUTE_PREFIX = ''
 
 
 CREDENTIALS_EXCEPTION = HTTPException(

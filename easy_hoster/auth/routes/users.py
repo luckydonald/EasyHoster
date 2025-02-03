@@ -1,15 +1,15 @@
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from .crypt import hash_password
-from .depends import AuthenticatedAdmin
-from .io import user_store
-from .models import FullUser, Role, StoredUser, ApiUser
+from ..crypt import hash_password
+from ..depends import AuthenticatedAdmin
+from ..io import user_store
+from ..models import FullUser, Role, StoredUser, ApiUser
 
-admin = APIRouter()
+users = APIRouter()
 
 
-@admin.put("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
+@users.put("/", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def create_user(
     username: str,
     password: str,
@@ -33,7 +33,7 @@ async def create_user(
 # end def
 
 
-@admin.post("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
+@users.post("/", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def change_user(
     _: AuthenticatedAdmin,
     username: str,
@@ -64,7 +64,7 @@ async def change_user(
 # end def
 
 
-@admin.get("/users", response_model=list[ApiUser], status_code=status.HTTP_200_OK)
+@users.get("/", response_model=list[ApiUser], status_code=status.HTTP_200_OK)
 async def list_users(
     _: AuthenticatedAdmin,
 ):

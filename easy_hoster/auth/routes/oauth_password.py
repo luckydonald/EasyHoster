@@ -1,19 +1,29 @@
 from datetime import timedelta
+from typing import Annotated
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordRequestForm
 
-from .crypt import verify_password, hash_password
-from .depends import OAuthPasswordForm
-from .models import Token, TokenData
-from .io import user_store
-from .env import TOKEN_EXPIRE_MINUTES
-from .token import create_access_token
+from ..crypt import verify_password
+from ..models import Token, TokenData
+from ..io import user_store
+from ..env import TOKEN_EXPIRE_MINUTES
+from ..token import create_access_token
 
 oauth_password = APIRouter()
 
+async def get_OAuthPasswordForm():
+    """ This function is neeed to load the Import later, so we don't have import loops. """
+    from ..depends import OAuthPasswordForm
+
+    def inner(form_data: OAuthPasswordForm):
+        return form_data
+    # end def
+    return inner
+# end def
 
 @oauth_password.post("/token")
-async def login(form_data: OAuthPasswordForm):
+async def login(form_data: Annotated[OAuth2PasswordRequestForm, Depends(get_OAuthPasswordForm)]) -> Token:
     # if form_data.scopes != ["mango"]:
     #     raise HTTPException(status_code=400, detail='Incorrect scope: Must be "mango".')
     # '# end if

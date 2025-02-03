@@ -14,16 +14,14 @@ from typing import Annotated
 from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-from .constants import ROUTE_PREFIX
+from .constants import ROUTE_PREFIX, OAUTH_ROUTE_PREFIX
 from .models import FullUser, Role
 
 OAuthPasswordForm = Annotated[OAuth2PasswordRequestForm, Depends()]
 
-
-from .oauth_password import login, oauth_password
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{ROUTE_PREFIX}{oauth_password.url_path_for(login.__name__)}", auto_error=False)
-
-
+from .routes.oauth_password import login, oauth_password
+oauth2_token_url = f"{ROUTE_PREFIX}{OAUTH_ROUTE_PREFIX}{oauth_password.url_path_for(login.__name__)}"
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=oauth2_token_url, auto_error=False)
 Token = Annotated[str, Depends(oauth2_scheme)]
 
 from .core import get_current_user, has_current_user, get_current_user_or_none

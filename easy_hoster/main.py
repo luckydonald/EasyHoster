@@ -1,7 +1,6 @@
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
-from .auth.depends import Token
 from .auth.routes import auth
 from .auth.constants import ROUTE_PREFIX as AUTH_ROUTE_PREFIX
 from .buckets.routes import buckets
