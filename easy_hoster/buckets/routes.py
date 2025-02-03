@@ -123,7 +123,7 @@ async def get_file(
     if dl:
         return FileResponse(info.locations.file, media_type='application/octet-stream', filename=info.meta.original_name)
     else:
-        return FileResponse(info.locations.file)
+        return FileResponse(info.locations.file, media_type=info.meta.content_type, filename=info.meta.original_name)
     # end if
 # end def
 
