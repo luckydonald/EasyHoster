@@ -1,8 +1,9 @@
 # Load user data from JSON file
 import json
+from collections.abc import Generator
 from json import JSONDecodeError
 from pathlib import Path
-from .models import StoredUsers, StoredUser, Username, Password, DatabaseV1, Role
+from .models import StoredUsers, StoredUser, Username, Password, DatabaseV1, Role, FullUser
 
 __all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE", "dump_db"]
 
@@ -96,6 +97,12 @@ class UserStore():
 
     def __contains__(self, user: Username):
         return self.has(user)
+    # end def
+
+    def __iter__(self) -> Generator[tuple[FullUser], None, None]:
+        for username, user in self.user_data.items():
+            yield user.to_full(username=username)
+        # end for
     # end def
 # end class
 

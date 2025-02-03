@@ -32,3 +32,9 @@ async def create_user(
     user_store[username] = new_user
     return new_user
 # end def
+
+
+@admin.get("/users", response_model=list[ApiUser], status_code=status.HTTP_200_OK)
+async def list_users():
+    return [user.to_api() for user in user_store]
+# end def
