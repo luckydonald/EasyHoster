@@ -3,10 +3,12 @@ from fastapi.security import OAuth2PasswordBearer
 from jwt import InvalidTokenError
 from pydantic import ValidationError
 
+from .constants import CREDENTIALS_EXCEPTION
 from .depends import Token
 from .io import user_store
-from .models import FullUser, Role, Username, Password
+from .models import FullUser, Role, Username
 from .token import parse_token_data
+
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -44,22 +46,18 @@ async def get_current_user(token: Token) -> FullUser:
     """
     :raises HTTPException: Unauthorized.
     """
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid authentication credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
+
     try:
         token_data = parse_token_data(token)
     except (InvalidTokenError, ValidationError):
-        raise credentials_exception
+        raise CREDENTIALS_EXCEPTION
     # end if
     if token_data.username is None:
-        raise credentials_exception
+        raise CREDENTIALS_EXCEPTION
     # end if
     user = load_user(username=token_data.username)
     if user is None:
-        raise credentials_exception
+        raise CREDENTIALS_EXCEPTION
     # end if
     return user
 # end def
