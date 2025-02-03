@@ -20,7 +20,7 @@ from .models import EffectiveRole, Bucket, FileId
 def current_user_has_effective_role(role: Role | EffectiveRole):
     async def _current_user_has_effective_role_uploader(current_user: AuthenticatedUser, bucket: Bucket, file_id: FileId):
         info = await get_file_metadata(bucket, file_id)
-        return error_if_forbidden(
+        return error_if_forbidden[AuthenticatedUser](
             allowed=current_user.username == info.meta.uploaded_by,
             role=role,
             user=current_user,
@@ -29,8 +29,8 @@ def current_user_has_effective_role(role: Role | EffectiveRole):
 
     async def _current_user_has_effective_role_unauthenticated(
         current_user: AuthenticatedUserOrNone,
-    ) -> FullUser:
-        return error_if_forbidden(
+    ) -> FullUser | None:
+        return error_if_forbidden[FullUser | None](
             allowed=current_user is None,
             role=role,
             user=current_user,
