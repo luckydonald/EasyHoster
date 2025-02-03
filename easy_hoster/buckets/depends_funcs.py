@@ -17,7 +17,16 @@ from .models import EffectiveRole, Bucket, FileId, GetFileMetadata
 
 
 def current_user_has_effective_role(role: Role | EffectiveRole):
+    def _null_check(current_user: AuthenticatedUser | None) -> None:
+        error_if_forbidden(
+            allowed=current_user is not None,
+            role=role,
+            user=current_user,
+        )
+    # end def
+
     async def _current_user_has_effective_role_uploader(current_user: AuthenticatedUser, bucket: Bucket, file_id: FileId):
+        _null_check(current_user)
         info = await get_file_metadata(bucket, file_id)
         return error_if_forbidden(
             allowed=current_user.username == info.meta.uploaded_by,
@@ -36,9 +45,15 @@ def current_user_has_effective_role(role: Role | EffectiveRole):
         )
     # end def
 
+    async def _null_checked_current_user_has_role(current_user: AuthenticatedUser | None) -> FullUser | None:
+        _null_check(current_user)
+        await current_user_has_role(role)(current_user=current_user)
+        return current_user
+    # end def
+
     match role:
         case Role.ADMIN | Role.NORMAL:
-            return current_user_has_role(role)
+            return _null_checked_current_user_has_role
         # end case
         case EffectiveRole.UPLOADER:
             return _current_user_has_effective_role_uploader

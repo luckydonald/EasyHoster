@@ -1,3 +1,4 @@
+import inspect
 
 from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
@@ -9,11 +10,11 @@ import logging
 
 from starlette import status
 
+from .depends_funcs import current_user_has_effective_role
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
 from .io import write_meta, read_meta
-from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket
-from ..auth.core import current_user_has_role
+from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket, EffectiveRole
 from ..auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
 
 
@@ -77,14 +78,25 @@ async def list_bucket(
             continue
         # end def
         meta = await read_meta(meta_file)
-        for role in meta.allowed_roles:
+        possible_params = dict(current_user=current_user, bucket=bucket, file_id=file_id)
+        for role_value, is_enabled in meta.allowed_roles:
+            if not is_enabled:
+                continue
+            # end if
+            role = EffectiveRole(role_value)
             try:
-                checker = current_user_has_role(role)
-                user = checker(current_user=current_user)
-            except HTTPException:
+                checker = current_user_has_effective_role(role)
+                signature = inspect.signature(checker)
+                kwargs = {
+                    key : value
+                    for key, value in possible_params.items()
+                    if key in signature.parameters.keys()
+                }
+                user = await checker(**kwargs)
+            except HTTPException as e:
                 continue
             # end try
-            if user is None:
+            if user is None and role is not EffectiveRole.UNAUTHENTICATED:
                 continue
             # end if
             blob_files.append(meta.as_with_bucket(bucket=bucket))
