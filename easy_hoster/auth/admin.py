@@ -10,11 +10,11 @@ from .models import FullUser, Role, StoredUser, ApiUser
 admin = APIRouter()
 
 
-@admin.post("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
+@admin.put("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def create_user(
     username: str,
     password: str,
-    current_user: AuthenticatedAdmin,
+    _: AuthenticatedAdmin,
     role: Role = Role.NORMAL,
 ):
     if username in user_store:
@@ -35,6 +35,8 @@ async def create_user(
 
 
 @admin.get("/users", response_model=list[ApiUser], status_code=status.HTTP_200_OK)
-async def list_users():
+async def list_users(
+    _: AuthenticatedAdmin,
+):
     return [user.to_api() for user in user_store]
 # end def
