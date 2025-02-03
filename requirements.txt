@@ -3,7 +3,8 @@ fastapi[standard]==0.115.7
 pydantic==2.10.6
 
 # auth:
-passlib
+#passlib==1.7.4  # broken, see https://foss.heptapod.net/python-libs/passlib/-/issues/190, wait for 1.7.5.
+passlib-fork==1.7.4.post2
 bcrypt
 # python-multipart included in fastapi[standard]
 pyjwt[crypto]
