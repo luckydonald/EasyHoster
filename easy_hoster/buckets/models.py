@@ -6,16 +6,15 @@ from typing import Annotated, NamedTuple, Mapping, TypedDict, cast as hint
 
 from starlette.datastructures import Headers
 from typing_extensions import Doc
-from uuid import UUID
-
 from pydantic import BaseModel, Field, create_model
 
+from .utils.new_uuids import UUID7
 from ..auth.models import Username, Role
 
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
 Bucket = Annotated[str, Doc("Where it's stored in"), Field(pattern=BUCKET_PATTERN)]
-FileId = Annotated[UUID, Doc("The UUID of the file.")]
+FileId = Annotated[UUID7, Doc("The UUID of the file."), ]
 
 
 class EffectiveRoleAdditions(StrEnum):
