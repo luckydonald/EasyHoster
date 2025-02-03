@@ -1,9 +1,12 @@
 ### USER ADDED
 
 # auth
-user_data.json
+easy_hoster_data/user_data.json
 # buckets
-uploads/*
+easy_hoster_data/uploads/*
+# combined:
+easy_hoster_data/*
+
 
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
