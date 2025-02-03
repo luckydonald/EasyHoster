@@ -2,6 +2,7 @@ ARG PYTHON_VERSION=3.12
 
 FROM python:${PYTHON_VERSION}
 WORKDIR /code
+VOLUME /code/easy_hoster_data
 
 ARG PORT=80
 
