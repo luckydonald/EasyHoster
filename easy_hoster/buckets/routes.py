@@ -65,7 +65,7 @@ async def upload_file(
 
 @buckets.get("/{bucket}", status_code=201)
 async def list_bucket(
-    user: AuthenticatedUserOrNone,
+    current_user: AuthenticatedUserOrNone,
     bucket: Bucket,
 ) -> list[FileMetadataWithBucket]:
     blob_files = []
@@ -79,7 +79,8 @@ async def list_bucket(
         meta = await read_meta(meta_file)
         for role in meta.allowed_roles:
             try:
-                user = current_user_has_role(role)
+                checker = current_user_has_role(role)
+                user = checker(current_user=current_user)
             except HTTPException:
                 continue
             # end try
