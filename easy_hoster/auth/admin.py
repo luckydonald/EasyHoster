@@ -1,4 +1,7 @@
+from typing import Annotated
+
 from fastapi import APIRouter, HTTPException
+from pydantic import Field
 from starlette import status
 
 from .crypt import hash_password
@@ -11,10 +14,10 @@ admin = APIRouter()
 
 @admin.put("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
 async def create_user(
+    _: AuthenticatedAdmin,
     username: str,
     password: str,
-    _: AuthenticatedAdmin,
-    role: Role = Role.NORMAL,
+    roles: Annotated[list[Role], Field(examples=[Role.NORMAL])],
 ):
     if username in user_store:
         raise HTTPException(
@@ -26,7 +29,7 @@ async def create_user(
     # Note: This is not current_user, but the new one.
     new_user = StoredUser(
         password=hashed_password,
-        roles=[role],
+        roles=roles,
     )
     user_store[username] = new_user
     return new_user
@@ -38,7 +41,7 @@ async def change_user(
     _: AuthenticatedAdmin,
     username: str,
     password: str | None = None,
-    role: Role | None = None,
+    roles: Annotated[list[Role] | None, Field(examples=[Role.NORMAL])] = None,
 ):
     if username not in user_store:
         raise HTTPException(
@@ -54,8 +57,8 @@ async def change_user(
         user_to_change.password = hashed_password
     # end if
 
-    if role is not None:
-        user_to_change.roles = [role]
+    if roles is not None:
+        user_to_change.roles = roles
     # end if
 
     user_store.save()
