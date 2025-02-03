@@ -3,12 +3,16 @@ import json
 from collections.abc import Generator
 from json import JSONDecodeError
 from pathlib import Path
+
 from .models import StoredUsers, StoredUser, Username, Password, DatabaseV1, Role, FullUser
+
+from ..constants import DATA_DIR
+
 
 __all__ = ["user_store", "load_user_data", "save_user_data", "UserStore", "USER_DATA_FILE", "dump_db"]
 
 
-USER_DATA_FILE = Path("user_data.json")
+USER_DATA_FILE = DATA_DIR / "user_data.json"
 
 
 def dump_db(db: DatabaseV1, file: Path):

@@ -4,8 +4,11 @@ from pathlib import Path
 from .models import Bucket, FileId, GetFilePaths, GetFileMetadata
 from .io import read_meta
 
+from ..constants import DATA_DIR
+
+
 # Directory to store uploaded files
-UPLOAD_DIR = Path("uploads")
+UPLOAD_DIR = DATA_DIR / "uploads"
 
 
 def calculate_bucket_folder(
