@@ -1,12 +1,11 @@
 from fastapi import HTTPException, APIRouter
 from fastapi.responses import FileResponse
-from uuid import UUID
 
 import uuid6
 import shutil
 
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
-from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField
+from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
 from .io import write_meta
 from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
@@ -17,12 +16,12 @@ buckets = APIRouter()
 # Ensure the upload directory exists
 UPLOAD_DIR.mkdir(exist_ok=True)
 
-from typing import get_args
+
 @buckets.post("/upload/{bucket}", response_model=UploadFileResult, status_code=201)
 async def upload_file(
+    user: AuthenticatedAdmin,
     bucket: Bucket,
     file: UploadedFile,
-    user: AuthenticatedAdmin,
     now: Now,
     access_level: FormField(AllowedRoles, 'access_level'),
 ):
@@ -58,9 +57,9 @@ async def upload_file(
 
 @buckets.get("/file/{bucket}/{file_id}")
 async def get_file(
+    _: AuthenticatedMatchesMeta,
     file_id: FileId,
     bucket: Bucket,
-    _: AuthenticatedMatchesMeta,
     dl: bool = False,
 ):
     info = await get_file_metadata(bucket, file_id)
@@ -74,9 +73,9 @@ async def get_file(
 
 @buckets.get("/metadata/{bucket}/{file_id}", response_model=FileMetadataWithBucket)
 async def get_metadata(
+    _: AuthenticatedMatchesMeta,
     file_id: FileId,
     bucket: Bucket,
-    _: AuthenticatedMatchesMeta,
 ):
     info = await get_file_metadata(bucket, file_id)
     return info.meta.as_with_bucket(bucket=bucket)
