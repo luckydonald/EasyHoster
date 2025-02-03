@@ -67,8 +67,8 @@ async def upload_file(
 async def list_bucket(
     user: AuthenticatedUserOrNone,
     bucket: Bucket,
-) -> list[FileId]:
-    blob_files = []
+) -> dict[FileId, FileMetadataWithBucket]:
+    blob_files = {}
     for meta_file in calculate_bucket_folder(bucket).glob("*.meta"):
         blob_file = meta_file.with_suffix(".blob")
         file_id = FileId(meta_file.with_suffix('').name)
@@ -86,7 +86,7 @@ async def list_bucket(
             if user is None:
                 continue
             # end if
-            blob_files.append(file_id)
+            blob_files[file_id] = meta.as_with_bucket(bucket=bucket)
             break
         else:  # never did 'break' -> nothing found
             continue
