@@ -5,9 +5,9 @@ from .oauth_password import oauth_password
 
 from .users import users
 from .utils import utils
-from ..constants import OAUTH_ROUTE_PREFIX
+from ..constants import OAUTH_ROUTE_PREFIX, TAG
 
 auth = APIRouter()
-auth.include_router(utils, prefix="/utils", tags=["utils"])
-auth.include_router(oauth_password, prefix=OAUTH_ROUTE_PREFIX, tags=["oauth"])
-auth.include_router(users, prefix="/users", tags=["users"])
+auth.include_router(utils, prefix="/utils", tags=[f"{TAG}.utils"])
+auth.include_router(oauth_password, prefix=OAUTH_ROUTE_PREFIX, tags=[f"{TAG}.oauth"])
+auth.include_router(users, prefix="/users", tags=[f"{TAG}.users"])

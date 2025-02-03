@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from starlette import status
 
+TAG = "auth"
 ROUTE_PREFIX = '/auth'
 OAUTH_ROUTE_PREFIX = ''
 
