@@ -26,7 +26,7 @@ from .core import get_current_user, has_current_user, get_current_user_or_none
 
 HasAuthenticatedUser = Annotated[bool, Depends(has_current_user)]
 AuthenticatedUser = Annotated[FullUser, Depends(get_current_user)]
-AuthenticatedUserOrNone = Annotated[FullUser, Depends(get_current_user_or_none)]
+AuthenticatedUserOrNone = Annotated[FullUser | None, Depends(get_current_user_or_none)]
 
 
 # noinspection PyPep8Naming
