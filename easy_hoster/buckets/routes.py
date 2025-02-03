@@ -19,7 +19,7 @@ buckets = APIRouter()
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 
-@buckets.post("/upload/{bucket}", response_model=UploadFileResult, status_code=201)
+@buckets.put("/{bucket}", response_model=UploadFileResult, status_code=201)
 async def upload_file(
     user: AuthenticatedAdmin,
     bucket: Bucket,
@@ -57,7 +57,7 @@ async def upload_file(
 # end def
 
 
-@buckets.get("/file/{bucket}/{file_id}")
+@buckets.get("/{bucket}/{file_id}")
 async def get_file(
     _: AuthenticatedMatchesMeta,
     file_id: FileId,
@@ -73,7 +73,7 @@ async def get_file(
 # end def
 
 
-@buckets.get("/metadata/{bucket}/{file_id}", response_model=FileMetadataWithBucket)
+@buckets.get("/{bucket}/{file_id}/metadata", response_model=FileMetadataWithBucket)
 async def get_metadata(
     _: AuthenticatedMatchesMeta,
     file_id: FileId,
@@ -84,7 +84,7 @@ async def get_metadata(
 # end def
 
 
-@buckets.delete("/file/{bucket}/{file_id}")
+@buckets.delete("/{bucket}/{file_id}")
 async def delete_file(
     _: AuthenticatedUploader,
     file_id: FileId,

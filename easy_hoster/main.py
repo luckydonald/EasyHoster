@@ -7,8 +7,8 @@ from .buckets.routes import buckets
 
 app = FastAPI()
 
-app.include_router(buckets, tags=["bucket"])
 app.include_router(auth, prefix=AUTH_ROUTE_PREFIX, tags=[AUTH_TAG])
+app.include_router(buckets, tags=["bucket"])
 
 
 # CORS configuration
