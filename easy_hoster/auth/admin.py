@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException
 from starlette import status
 
-from .core import is_admin
 from .crypt import hash_password
 from .depends import AuthenticatedAdmin
 from .io import user_store
@@ -31,6 +30,37 @@ async def create_user(
     )
     user_store[username] = new_user
     return new_user
+# end def
+
+
+@admin.post("/users", response_model=FullUser, status_code=status.HTTP_201_CREATED)
+async def change_user(
+    _: AuthenticatedAdmin,
+    username: str,
+    password: str | None = None,
+    role: Role | None = None,
+):
+    if username not in user_store:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Username not found exists"
+        )
+    # end if
+
+    # Note: This is not current_user, but the new one.
+    user_to_change = user_store[username]
+
+    if password is not None:
+        hashed_password = hash_password(password)
+        user_to_change.password = hashed_password
+    # end if
+
+    if role is not None:
+        user_to_change.roles = [role]
+    # end if
+
+    user_store.save()
+
+    return user_to_change
 # end def
 
 
