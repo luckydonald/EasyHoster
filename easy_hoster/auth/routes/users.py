@@ -60,7 +60,7 @@ async def change_user(
 
     user_store.save()
 
-    return user_to_change
+    return user_to_change.to_full(username=username)
 # end def
 
 
