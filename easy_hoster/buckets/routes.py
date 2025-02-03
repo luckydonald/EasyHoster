@@ -8,7 +8,7 @@ import shutil
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField
 from .io import write_meta
-from .models import Bucket, FileId, AccessLevel
+from .models import Bucket, FileId, AllowedRoles
 from .models import FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 
@@ -25,7 +25,7 @@ async def upload_file(
     file: UploadedFile,
     user: AuthenticatedAdmin,
     now: Now,
-    access_level: FormField(AccessLevel, 'access_level'),
+    access_level: FormField(AllowedRoles, 'access_level'),
 ):
     if not user:
         raise HTTPException(status_code=403, detail="Not authorized to upload files")
@@ -38,7 +38,7 @@ async def upload_file(
     meta = FileMetadataWithBucket(
         bucket=bucket,
         file_id=file_id,
-        access_level=access_level,
+        allowed_roles=access_level,
         original_name=file.filename,
         size=file.size,
         uploaded_by=user.username,

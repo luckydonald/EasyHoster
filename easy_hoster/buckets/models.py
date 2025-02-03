@@ -35,7 +35,7 @@ access_level_defaults: dict[EffectiveRole, bool] = {
 }
 
 # noinspection PyArgumentList
-AccessLevel = create_model(
+AllowedRoles = create_model(
     "AccessLevel",
     __doc__="The allowed roles for this file.",
     **{
@@ -54,7 +54,7 @@ class FileMetadata(BaseModel):
     file_id: Annotated[FileId, Doc("The newly generated UUID file name. Might be a UUID7 format.")]
     original_name: Annotated[str | None, Doc("The original file name.")]
     size: Annotated[int | None, Doc("The size of the file in bytes.")]
-    access_level: Annotated[AccessLevel, Doc("The access level of the file, based on the roles.")]
+    allowed_roles: Annotated[AllowedRoles, Doc("The access level of the file, based on the roles.")]
     uploaded_by: Username
     uploaded_at: datetime
     content_type: Annotated[str | None, Doc("The content type of the request, from the headers.")]
