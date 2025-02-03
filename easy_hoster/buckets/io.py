@@ -22,7 +22,8 @@ async def read_meta(
     path: Path,
 ) -> FileMetadata:
     with open(path, "r") as f:
-        data = json.load(f)
+        text = f.read()
+        data = json.loads(text)
     # end with
 
     return FileMetadata(**data)
