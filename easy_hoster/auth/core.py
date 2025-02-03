@@ -28,12 +28,14 @@ def is_admin(user: FullUser) -> bool:
 
 
 async def has_current_user(token: Token) -> bool:
+    token: Token | None  # must be typed here. Typing that as `… | None` in the signature causes `token` not found in "loc".
     user = await get_current_user_or_none(token)
     return bool(user)
 # end def
 
 
 async def get_current_user_or_none(token: Token) -> FullUser | None:
+    token: Token | None  # must be typed here. Typing that as `… | None` in the signature causes `token` not found in "loc".
     try:
         return await get_current_user(token)
     except HTTPException:
@@ -46,6 +48,7 @@ async def get_current_user(token: Token) -> FullUser:
     """
     :raises HTTPException: Unauthorized.
     """
+    token: Token | None  # must be typed here. Typing that as `… | None` in the signature causes `token` not found in "loc".
 
     try:
         token_data = parse_token_data(token)
