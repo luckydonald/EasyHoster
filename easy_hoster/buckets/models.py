@@ -106,3 +106,8 @@ class GetFileMetadata(NamedTuple):
     locations: GetFilePaths
     meta: FileMetadata
 # end class
+
+
+class UploadFileResult(BaseModel):
+    file_id: FileId
+# end class

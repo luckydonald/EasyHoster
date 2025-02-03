@@ -8,8 +8,7 @@ import shutil
 from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata
 from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField
 from .io import write_meta
-from .models import Bucket, FileId, AllowedRoles
-from .models import FileMetadataWithBucket
+from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket
 from ..auth.depends import AuthenticatedAdmin
 
 buckets = APIRouter()
@@ -19,7 +18,7 @@ buckets = APIRouter()
 UPLOAD_DIR.mkdir(exist_ok=True)
 
 from typing import get_args
-@buckets.post("/upload/{bucket}")
+@buckets.post("/upload/{bucket}", response_model=UploadFileResult, status_code=201)
 async def upload_file(
     bucket: Bucket,
     file: UploadedFile,
@@ -51,6 +50,9 @@ async def upload_file(
     with open(locations.file, "wb") as f:
         shutil.copyfileobj(file.file, f)
     # end with
+    return UploadFileResult(
+        file_id=file_id,
+    )
 # end def
 
 
