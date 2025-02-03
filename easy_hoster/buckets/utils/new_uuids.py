@@ -114,7 +114,7 @@ UUID7_2 = Annotated[
     ),
 ]
 
-UUID7 = UUID7_1
+UUID7 = UUID7_2
 
 
 if __name__ == "__main__":
