@@ -20,8 +20,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-@app.get("/items/")
-async def read_items(token: Token):
-    return {"token": token}
