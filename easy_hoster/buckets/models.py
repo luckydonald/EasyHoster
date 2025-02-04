@@ -136,7 +136,7 @@ class FileMetadataWithBucket(FileMetadata):
         *,
         request: Request,
     ) -> 'FileMetadataForApi':
-        from .routes import get_file
+        from .routes.file import get_file
         return FileMetadataForApi(
             # inherit everything except headers
             **{
