@@ -15,7 +15,7 @@ from ..depends import UploadedFile, Now, FormField
 from ..io import write_meta, read_meta
 from ..models import Bucket, FileId, AllowedRoles, FileMetadataWithBucket, EffectiveRole, \
     FileMetadataForApi
-from easy_hoster.auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
+from ...auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
 
 
 buckets = APIRouter()
