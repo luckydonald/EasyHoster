@@ -11,13 +11,13 @@ import logging
 from starlette import status
 from starlette.requests import Request
 
-from .depends_funcs import current_user_has_effective_role
-from .paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
-from .depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
-from .io import write_meta, read_meta
-from .models import Bucket, FileId, AllowedRoles, UploadFileResult, FileMetadataWithBucket, EffectiveRole, \
+from ..depends_funcs import current_user_has_effective_role
+from ..paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
+from ..depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
+from ..io import write_meta, read_meta
+from ..models import Bucket, FileId, AllowedRoles, FileMetadataWithBucket, EffectiveRole, \
     FileMetadataForApi
-from ..auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
+from easy_hoster.auth.depends import AuthenticatedAdmin, AuthenticatedUserOrNone
 
 
 buckets = APIRouter()
