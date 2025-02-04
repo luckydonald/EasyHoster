@@ -5,6 +5,8 @@ from fastapi import Request, Response, APIRouter, HTTPException
 
 import os
 
+from starlette import status
+
 from .bucket import list_bucket
 from .file import get_file
 from .templates import templates
@@ -16,14 +18,30 @@ from ...auth.depends import AuthenticatedUserOrNone
 webdav = APIRouter()
 
 
-@webdav.options("/webdav/{path:path}")
-async def webdav_options(request: Request, path: str):
-    """
-    Handle OPTIONS requests for WebDAV.
-    """
-    response = Response(status_code=200)
-    response.headers["Allow"] = "GET, PUT, DELETE, OPTIONS"
-    response.headers["DAV"] = "1, 2"
+@webdav.options("/webdav")
+@webdav.options("/webdav/")
+async def webdav_options():
+    response = Response(status_code=status.HTTP_200_OK)
+    response.headers["Allow"] = "GET, OPTIONS, PROPFIND"  # TODO: re-enable PUT, DELETE
+    response.headers["DAV"] = "1"  # TODO: maybe implement 2, so we can write `"1, 2"`.
+    return response
+# end def
+
+
+@webdav.options("/webdav/{bucket}")
+@webdav.options("/webdav/{bucket}/")
+async def webdav_options(bucket: Bucket):
+    response = Response(status_code=status.HTTP_200_OK)
+    response.headers["Allow"] = "GET, OPTIONS, PROPFIND"  # TODO: re-enable PUT, DELETE
+    return response
+# end def
+
+
+@webdav.options("/webdav/{bucket}/{file_id}")
+@webdav.options("/webdav/{bucket}/{file_id}.{ext}")
+async def webdav_options(bucket: Bucket, file_id: FileId, ext: str | None = None):
+    response = Response(status_code=status.HTTP_200_OK)
+    response.headers["Allow"] = "GET, OPTIONS"  # TODO: re-enable PUT, DELETE
     return response
 # end def
 
@@ -176,6 +194,7 @@ async def webdav_put(request: Request, path: str):
     """
     Handle PUT requests for WebDAV.
     """
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
     full_path = os.path.join(WEBDAV_ROOT_DIR, path)
     directory = os.path.dirname(full_path)
     os.makedirs(directory, exist_ok=True)
@@ -191,6 +210,7 @@ async def webdav_delete(request: Request, path: str):
     """
     Handle DELETE requests for WebDAV.
     """
+    raise HTTPException(status_code=status.HTTP_501_NOT_IMPLEMENTED)
     full_path = os.path.join(WEBDAV_ROOT_DIR, path)
     if os.path.isfile(full_path):
         os.remove(full_path)
