@@ -3,7 +3,7 @@ from datetime import datetime
 from enum import StrEnum
 from itertools import chain
 from pathlib import Path
-from typing import Annotated, NamedTuple, Mapping, cast as hint
+from typing import Annotated, NamedTuple, Mapping
 
 from starlette.datastructures import Headers
 from starlette.requests import Request
@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field, create_model, HttpUrl
 from .utils.new_uuids import UUID7
 from .utils.urls import add_query
 from ..auth.models import Username, Role
+from ..utils import hint
 
 BUCKET_PATTERN = "^[a-zA-Z0-9_-]+$"
 
