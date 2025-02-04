@@ -87,7 +87,9 @@ async def current_user_has_effective_role_matching_meta(
             detail=f"User does not have access. One of the following roles is required: {allowed_roles!r}",
         )
     # end if
+    return result
 # end def
+
 
 async def current_user_has_effective_role_matching_meta_or_none(
     *,
@@ -110,6 +112,7 @@ async def current_user_has_effective_role_matching_meta_or_none(
         if not should_check:
             continue
         # end if
+        role = EffectiveRole(role)
         func = current_user_has_effective_role(role)
         try:
             try:

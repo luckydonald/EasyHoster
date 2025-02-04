@@ -1,7 +1,8 @@
 from pathlib import Path
 from mimetypes import guess_extension
+from typing import Annotated
 
-from fastapi import Request, Response, APIRouter, HTTPException
+from fastapi import Request, Response, APIRouter, HTTPException, Depends
 
 import os
 
@@ -10,13 +11,23 @@ from starlette import status
 from .bucket import list_bucket
 from .file import get_file
 from .templates import templates
-from ..depends import AuthenticatedMatchesMeta
+from ..depends_funcs import current_user_has_effective_role_matching_meta
 from ..models import Bucket, FileId
 from ..paths import UPLOAD_DIR, get_file_metadata
-from ...auth.depends import AuthenticatedUserOrNone
+from ...auth.basic_auth.depends import AuthenticatedUserOrNone
+from ...auth.models import FullUser
 
 webdav = APIRouter()
 
+async def current_user_has_effective_role_matching_meta_in_basic_auth(
+    current_user: AuthenticatedUserOrNone,
+    bucket: Bucket,
+    file_id: FileId,
+) -> None:
+    return await current_user_has_effective_role_matching_meta(current_user, bucket, file_id)
+# end def
+
+AuthenticatedMatchesMeta = Annotated[FullUser, Depends(current_user_has_effective_role_matching_meta_in_basic_auth)]
 
 @webdav.options("/webdav")
 @webdav.options("/webdav/")

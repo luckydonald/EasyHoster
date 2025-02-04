@@ -93,8 +93,9 @@ def error_if_forbidden(
     user: Input,
 ) -> Input:
     if not allowed:
+        role = role.value if isinstance(role, Role) else str(role)
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail=f"Only users with role {role.value} can access this route.",
+            status_code=status.HTTP_403_FORBIDDEN, detail=f"Only users with role {role!r} can access this route.",
         )
     # end if
     return user
