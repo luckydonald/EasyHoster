@@ -153,10 +153,19 @@ async def webdav_get_bucket(
 # end def
 
 
-@webdav.get("/webdav/{path:path}")
-async def webdav_get(request: Request, path: str):
+@webdav.api_route("/webdav/{path:path}", methods=["PROPFIND"])
+async def webdav_propfind_fallback(request: Request, path: str):
     """
-    Handle stray requests, which are allowed per WebDAV specification.
+    Handle stray requests, which are allowed per WebDAV specification. Return 404.
+    """
+    return Response(status_code=404)
+# end def
+
+
+@webdav.get("/webdav/{path:path}")
+async def webdav_get_fallback(request: Request, path: str):
+    """
+    Handle stray requests, which are allowed per WebDAV specification. Return 404.
     """
     return Response(status_code=404)
 # end def
