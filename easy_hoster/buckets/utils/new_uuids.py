@@ -1,3 +1,5 @@
+from logging import getLogger
+
 from pydantic import BaseModel, PlainValidator, GetPydanticSchema
 from dataclasses import dataclass
 from typing import Annotated, Any, Literal, ClassVar
@@ -6,12 +8,17 @@ from pydantic import GetCoreSchemaHandler, GetJsonSchemaHandler, UUID3
 from pydantic.json_schema import JsonSchemaValue
 from pydantic_core import PydanticCustomError, core_schema
 from uuid6 import UUID
-import uuid6
+
 import uuid
+
+import uuid6
+
+
+logger = getLogger(__name__)
 
 
 def parse(value: int | str | bytes | UUID) -> UUID:
-    print(f'PARSING UUID: {value!r}')
+    logger.debug(f'PARSING UUID: {value!r}')
     if isinstance(value, int):
         uuid = UUID(int=value)
     elif isinstance(value, str):
@@ -23,7 +30,7 @@ def parse(value: int | str | bytes | UUID) -> UUID:
     else:
         raise ValueError("Unrecognized format")
     # end if
-    print(f'PARSED  UUID: {uuid!r}')
+    logger.debug(f'PARSED  UUID: {uuid!r}')
     return uuid
 # end def
 
@@ -101,7 +108,7 @@ UUID8 = Annotated[UUID, UuidVersion[8]]
 
 
 def validate_uuid(val, version: Literal[1, 3, 4, 5, 6, 7, 8]) -> UUID:
-    print(f'PARSING UUIDv{version!r}: {val!r}')
+    logger.debug(f'PARSING UUIDv{version!r}: {val!r}')
     uuid = parse(val)
     if not isinstance(uuid, UUID):
         raise ValueError(f"Expected a UUID, got {type(val)}")
@@ -137,5 +144,5 @@ if __name__ == "__main__":
     # end class
 
     obj = MyModel(uid3=uuid.uuid3(uuid.NAMESPACE_DNS, "python.org"), uid6=uuid6.uuid6())
-    print(repr(obj))
+    logger.debug(repr(obj))
 # end if
