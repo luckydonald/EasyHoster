@@ -68,6 +68,7 @@ async def upload_file(
 async def list_bucket(
     current_user: AuthenticatedUserOrNone,
     request: Request,
+    *,
     bucket: Bucket,
 ) -> list[FileMetadataForApi]:
     blob_files = []

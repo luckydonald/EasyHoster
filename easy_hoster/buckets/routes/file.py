@@ -12,6 +12,7 @@ files = APIRouter()
 @files.get("/{bucket}/{file_id}")
 async def get_file(
     _: AuthenticatedMatchesMeta,
+    *,
     file_id: FileId,
     bucket: Bucket,
     dl: bool = False,

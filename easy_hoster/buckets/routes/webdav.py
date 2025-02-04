@@ -1,15 +1,20 @@
+from pathlib import Path
+
 from fastapi import Request, Response, APIRouter
-from starlette.responses import FileResponse
 import os
 
+from .bucket import list_bucket
+from .file import get_file
+from ..depends import AuthenticatedMatchesMeta
+from ..models import Bucket, FileId
+from ..paths import UPLOAD_DIR
+from ...auth.depends import AuthenticatedUserOrNone
+from ...utils import hint
 
-app = APIRouter()
-
-# Set the root directory for WebDAV access
-WEBDAV_ROOT_DIR = "/path/to/your/webdav/root"
+webdav = APIRouter()
 
 
-@app.options("/webdav/{path:path}")
+@webdav.options("/webdav/{path:path}")
 async def webdav_options(request: Request, path: str):
     """
     Handle OPTIONS requests for WebDAV.
@@ -21,26 +26,55 @@ async def webdav_options(request: Request, path: str):
 # end def
 
 
-
-@app.get("/webdav/{path:path}")
-async def webdav_get(request: Request, path: str):
-    """
-    Handle GET requests for WebDAV.
-    """
-    full_path = os.path.join(WEBDAV_ROOT_DIR, path)
-    if os.path.isfile(full_path):
-        return FileResponse(full_path)
-    elif os.path.isdir(full_path):
-        # Return a list of files and directories in the directory
-        contents = os.listdir(full_path)
-        return Response(content="\n".join(contents), media_type="text/plain")
-    else:
-        return Response(status_code=404)
-    # end if
+@webdav.get("/webdav/")
+async def webdav_get_root():
+    names = [hint(Path, p).name for p in UPLOAD_DIR.iterdir() if p.is_file()]
+    return Response(content="\n".join(names), media_type="text/plain")
 # end def
 
 
-@app.put("/webdav/{path:path}")
+
+@webdav.get("/webdav/{bucket}")
+async def webdav_get_bucket(
+    current_user: AuthenticatedUserOrNone,
+    request: Request,
+    bucket: Bucket,
+):
+    files = await list_bucket(
+        current_user=current_user,
+        request=request,
+        bucket=bucket,
+    )
+    names = [file.file_id for file in files]
+    return Response(content="\n".join(names), media_type="text/plain")
+# end def
+
+
+@webdav.get("/webdav/{bucket}/{file_id}")
+async def webdav_get_bucket(
+    _: AuthenticatedMatchesMeta,
+    bucket: Bucket,
+    file_id: FileId,
+):
+    return await get_file(
+        _=_,
+        bucket=bucket,
+        file_id=file_id,
+        dl=False,
+    )
+# end def
+
+
+@webdav.get("/webdav/{path:path}")
+async def webdav_get(request: Request, path: str):
+    """
+    Handle stray requests, which are allowed per WebDAV specification.
+    """
+    return Response(status_code=404)
+# end def
+
+
+@webdav.put("/webdav/{path:path}")
 async def webdav_put(request: Request, path: str):
     """
     Handle PUT requests for WebDAV.
@@ -55,7 +89,7 @@ async def webdav_put(request: Request, path: str):
 # end def
 
 
-@app.delete("/webdav/{path:path}")
+@webdav.delete("/webdav/{path:path}")
 async def webdav_delete(request: Request, path: str):
     """
     Handle DELETE requests for WebDAV.
