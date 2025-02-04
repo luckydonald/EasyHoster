@@ -1,19 +1,17 @@
 import inspect
 
 from fastapi import HTTPException, APIRouter
-from fastapi.responses import FileResponse
 
 import uuid6
 
 import shutil
 import logging
 
-from starlette import status
 from starlette.requests import Request
 
 from ..depends_funcs import current_user_has_effective_role
-from ..paths import UPLOAD_DIR, calculate_file_paths, get_file_metadata, calculate_bucket_folder
-from ..depends import UploadedFile, Now, AuthenticatedMatchesMeta, FormField, AuthenticatedUploader
+from ..paths import UPLOAD_DIR, calculate_file_paths, calculate_bucket_folder
+from ..depends import UploadedFile, Now, FormField
 from ..io import write_meta, read_meta
 from ..models import Bucket, FileId, AllowedRoles, FileMetadataWithBucket, EffectiveRole, \
     FileMetadataForApi
@@ -110,53 +108,3 @@ async def list_bucket(
     # end def
     return blob_files
 # end def
-
-
-@buckets.get("/{bucket}/{file_id}")
-async def get_file(
-    _: AuthenticatedMatchesMeta,
-    file_id: FileId,
-    bucket: Bucket,
-    dl: bool = False,
-):
-    info = await get_file_metadata(bucket, file_id)
-    if dl:
-        return FileResponse(path=info.locations.file, media_type='application/octet-stream', filename=info.meta.original_name)
-    else:
-        return FileResponse(path=info.locations.file, media_type=info.meta.content_type)
-    # end if
-# end def
-
-
-@buckets.get("/{bucket}/{file_id}/metadata", response_model=FileMetadataWithBucket)
-async def get_metadata(
-    _: AuthenticatedMatchesMeta,
-    file_id: FileId,
-    bucket: Bucket,
-):
-    info = await get_file_metadata(bucket, file_id)
-    return info.meta.as_with_bucket(bucket=bucket)
-# end def
-
-
-@buckets.delete("/{bucket}/{file_id}")
-async def delete_file(
-    _: AuthenticatedUploader,
-    file_id: FileId,
-    bucket: Bucket,
-) -> None:
-    locations = calculate_file_paths(bucket, file_id)
-    something_existed: bool = False
-    if locations.file.exists():
-        locations.file.unlink()
-        something_existed = True
-    # end if
-    if locations.meta.exists():
-        locations.meta.unlink()
-        something_existed = True
-    # end if
-    if not something_existed:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="File not found")
-    # end if
-    raise HTTPException(status_code=status.HTTP_410_GONE, detail="Deleted")
-# end if
