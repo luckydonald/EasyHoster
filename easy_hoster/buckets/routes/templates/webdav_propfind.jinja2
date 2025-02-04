@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<D:multistatus xmlns:D="DAV:">
+    {% for item in items %}
+    <D:response>
+        <D:href>/webdav/{{ item.path }}</D:href>
+        <D:propstat>
+            <D:prop>
+                {% if item.is_file %}
+                <D:resourcetype />
+                <D:getcontenttype>application/octet-stream</D:getcontenttype>
+                {% else %}
+                <D:resourcetype><D:collection/></D:resourcetype>
+                {% endif %}
+            </D:prop>
+            <D:status>HTTP/1.1 200 OK</D:status>
+        </D:propstat>
+    </D:response>
+    {% endfor %}
+</D:multistatus>

@@ -5,11 +5,11 @@ import os
 
 from .bucket import list_bucket
 from .file import get_file
+from .templates import templates
 from ..depends import AuthenticatedMatchesMeta
 from ..models import Bucket, FileId
 from ..paths import UPLOAD_DIR
 from ...auth.depends import AuthenticatedUserOrNone
-from ...utils import hint
 
 webdav = APIRouter()
 
@@ -26,12 +26,31 @@ async def webdav_options(request: Request, path: str):
 # end def
 
 
+def get_files_root() -> list[Path]:
+    return [p for p in UPLOAD_DIR.iterdir() if p.is_dir()]
+# end def
+
+
 @webdav.get("/webdav/")
 async def webdav_get_root():
-    names = [hint(Path, p).name for p in UPLOAD_DIR.iterdir() if p.is_file()]
+    names = [file.name for file in get_files_root()]
     return Response(content="\n".join(names), media_type="text/plain")
 # end def
 
+
+@webdav.api_route("/webdav/", methods=["PROPFIND"])
+async def webdav_propfind_root(request: Request):
+    items = [
+        {
+            "path": file.name,
+            "is_file": False,  # all buckets are folders
+        }
+        for file in get_files_root()
+    ]
+    return templates.TemplateResponse(
+        request=request, name="webdav_propfind.jinja2", context=dict(items=items)
+    )
+# end def
 
 
 @webdav.get("/webdav/{bucket}")
@@ -47,6 +66,30 @@ async def webdav_get_bucket(
     )
     names = [file.file_id for file in files]
     return Response(content="\n".join(names), media_type="text/plain")
+# end def
+
+
+@webdav.api_route("/webdav/{bucket}/", methods=["PROPFIND"])
+async def webdav_propfind_bucket(
+    current_user: AuthenticatedUserOrNone,
+    request: Request,
+    bucket: Bucket,
+):
+    metas = await list_bucket(
+        current_user=current_user,
+        request=request,
+        bucket=bucket,
+    )
+    items = [
+        {
+            "path": meta.file_id,
+            "is_file": True,  # no folders in the buckets
+        }
+        for meta in metas
+    ]
+    return templates.TemplateResponse(
+        request=request, name="webdav_propfind.jinja2", context=dict(items=items)
+    )
 # end def
 
 

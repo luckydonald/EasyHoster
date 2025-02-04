@@ -11,3 +11,6 @@ pyjwt[crypto]
 
 # bucket stuff:
 uuid6
+
+# webdav
+jinja2
