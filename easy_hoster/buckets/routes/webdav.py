@@ -71,11 +71,21 @@ async def webdav_get_bucket(
 # end def
 
 
-def get_webdav_suffix(content_type: str) -> str:
+def get_webdav_suffix(content_type: str, original_name: str) -> str:
     """ The suffix, starting with a dot. """
     ext = guess_extension(content_type)
     if ext is None:
-        return '.unknown'
+        suffixes = Path(original_name).suffixes
+        if not suffixes:
+            return '.unknown'
+        # end if
+        if len(suffixes) == 1:
+            return suffixes[0]
+        # end if
+        if suffixes[0] == ".tar":
+            return "".join(suffixes)
+        # end def
+        return suffixes[-1]
     # end if
     return ext
 # end def
@@ -95,7 +105,7 @@ async def webdav_propfind_bucket(
     )
     items = [
         {
-            "path": f"{meta.file_id}{get_webdav_suffix(meta.content_type)}",
+            "path": f"{meta.file_id}{get_webdav_suffix(meta.content_type, meta.original_name)}",
             "is_file": True,  # no folders in the buckets
             "mime": meta.content_type,
         }
@@ -115,7 +125,7 @@ async def webdav_get_bucket_with_ext(
     ext: str,
 ):
     info = await get_file_metadata(bucket=bucket, file_id=file_id)
-    expected_ext = get_webdav_suffix(info.meta.content_type)
+    expected_ext = get_webdav_suffix(info.meta.content_type, info.meta.original_name)
     if f".{ext}" != expected_ext:
         raise HTTPException(status_code=404, detail="File not found (extension mismatch).")
     # end if
