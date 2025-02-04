@@ -7,7 +7,7 @@
             <D:prop>
                 {% if item.is_file %}
                 <D:resourcetype />
-                <D:getcontenttype>application/octet-stream</D:getcontenttype>
+                <D:getcontenttype>{{ item.mime if item.mime else "application/octet-stream" }}</D:getcontenttype>
                 {% else %}
                 <D:resourcetype><D:collection/></D:resourcetype>
                 {% endif %}

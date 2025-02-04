@@ -84,6 +84,7 @@ async def webdav_propfind_bucket(
         {
             "path": meta.file_id,
             "is_file": True,  # no folders in the buckets
+            "mime": meta.content_type,
         }
         for meta in metas
     ]
