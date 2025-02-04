@@ -1,6 +1,8 @@
 from pathlib import Path
+from mimetypes import guess_extension
 
-from fastapi import Request, Response, APIRouter
+from fastapi import Request, Response, APIRouter, HTTPException
+
 import os
 
 from .bucket import list_bucket
@@ -8,7 +10,7 @@ from .file import get_file
 from .templates import templates
 from ..depends import AuthenticatedMatchesMeta
 from ..models import Bucket, FileId
-from ..paths import UPLOAD_DIR
+from ..paths import UPLOAD_DIR, get_file_metadata
 from ...auth.depends import AuthenticatedUserOrNone
 
 webdav = APIRouter()
@@ -69,6 +71,17 @@ async def webdav_get_bucket(
 # end def
 
 
+def get_webdav_suffix(content_type: str) -> str:
+    """ The suffix, starting with a dot. """
+    ext = guess_extension(content_type)
+    if ext is None:
+        return '.unknown'
+    # end if
+    return ext
+# end def
+
+
+
 @webdav.api_route("/webdav/{bucket}/", methods=["PROPFIND"])
 async def webdav_propfind_bucket(
     current_user: AuthenticatedUserOrNone,
@@ -82,7 +95,7 @@ async def webdav_propfind_bucket(
     )
     items = [
         {
-            "path": meta.file_id,
+            "path": f"{meta.file_id}{get_webdav_suffix(meta.content_type)}",
             "is_file": True,  # no folders in the buckets
             "mime": meta.content_type,
         }
@@ -90,6 +103,27 @@ async def webdav_propfind_bucket(
     ]
     return templates.TemplateResponse(
         request=request, name="webdav_propfind.jinja2", context=dict(items=items)
+    )
+# end def
+
+
+@webdav.get("/webdav/{bucket}/{file_id}.{ext}")
+async def webdav_get_bucket_with_ext(
+    _: AuthenticatedMatchesMeta,
+    bucket: Bucket,
+    file_id: FileId,
+    ext: str,
+):
+    info = await get_file_metadata(bucket=bucket, file_id=file_id)
+    expected_ext = get_webdav_suffix(info.meta.content_type)
+    if f".{ext}" != expected_ext:
+        raise HTTPException(status_code=404, detail="File not found (extension mismatch).")
+    # end if
+    return await get_file(
+        _=_,
+        bucket=bucket,
+        file_id=file_id,
+        dl=False,
     )
 # end def
 
