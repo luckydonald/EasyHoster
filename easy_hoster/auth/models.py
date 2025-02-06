@@ -47,6 +47,11 @@ class SharedUserData(BaseModel, ToFullInterface):
             roles=self.roles,
         )
     # end def
+
+    @property
+    def is_admin(self) -> bool:
+        return Role.ADMIN in self.roles
+    # end def
 # end class
 
 

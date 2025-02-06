@@ -1,5 +1,6 @@
 from pathlib import Path
 from mimetypes import guess_extension
+from time import ctime
 from typing import Annotated
 
 from fastapi import Request, Response, APIRouter, HTTPException, Depends
@@ -13,7 +14,8 @@ from .file import get_file
 from .templates import templates
 from ..depends_funcs import current_user_has_effective_role_matching_meta
 from ..models import Bucket, FileId
-from ..paths import UPLOAD_DIR, get_file_metadata
+from ..paths import UPLOAD_DIR, get_file_metadata, calculate_file_paths
+from ..utils.permissions import file_permissions
 from ...auth.basic_auth.depends import AuthenticatedUserOrNone
 from ...auth.models import FullUser
 
@@ -132,14 +134,25 @@ async def webdav_propfind_bucket(
         request=request,
         bucket=bucket,
     )
-    items = [
-        {
+    items = []
+    for meta in metas:
+        paths = calculate_file_paths(bucket=bucket, file_id=meta.file_id)
+        item = {
             "path": f"{meta.file_id}{get_webdav_suffix(meta.content_type, meta.original_name)}",
             "is_file": True,  # no folders in the buckets
             "mime": meta.content_type,
+            'size': meta.size, # paths.file.stat().st_size if paths.file.is_file() else None,  # Size in bytes
+            'last_modified': ctime(paths.file.stat().st_mtime),  # Last modified time
+            'creation_date': meta.uploaded_at.isoformat(), # ctime(paths.file.stat().st_ctime),  # Creation time
+            'etag': f'"{paths.file.stat().st_ino}-{paths.file.stat().st_mtime}"',  # Simple ETag based on inode and mtime
         }
-        for meta in metas
-    ]
+        if current_user and current_user.is_admin:
+            item['owner'] = meta.uploaded_by  # os.stat(paths.file).st_uid  # Owner UID
+            item['group'] = 'admin'
+            item['permissions'] = file_permissions(meta.allowed_roles)  # oct(paths.file.stat().st_mode)[-3:]  # Permissions in octal
+        # end if
+        items.append(item)
+    # end for
     return templates.TemplateResponse(
         request=request, name="webdav_propfind.jinja2", context=dict(items=items)
     )

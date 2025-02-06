@@ -8,6 +8,13 @@
                 {% if item.is_file %}
                 <D:resourcetype />
                 <D:getcontenttype>{{ item.mime if item.mime else "application/octet-stream" }}</D:getcontenttype>
+                {% if item.owner %}<D:owner>{{ owner }}</D:owner>{% endif %}
+                {% if item.group %}<D:group>{{ group }}</D:group>{% endif %}
+                {% if item.size %}<D:getcontentlength>{{ item.size }}</D:getcontentlength>{% endif %}
+                {% if item.last_modified %}<D:getlastmodified>{{ item.last_modified }}</D:getlastmodified>{% endif %}
+                {% if item.creation_date %}<D:creationdate>{{ item.creation_date }}</D:creationdate>{% endif %}
+                {% if item.etag %}<D:etag>{{ item.etag }}</D:etag>{% endif %}
+                {% if item.permissions %}<D:permissions>{{ item.permissions }}</D:permissions>{% endif %}
                 {% else %}
                 <D:resourcetype><D:collection/></D:resourcetype>
                 {% endif %}
